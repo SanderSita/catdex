@@ -6,11 +6,11 @@ breed "dex," and tracking achievements. iOS + Android from one codebase.
 ## Stack
 
 - Expo (React Native + TypeScript), React Navigation
-- Firebase: Auth (anonymous), Firestore, Storage, Cloud Functions
+- Supabase: Auth (anonymous), Postgres, Storage, Edge Functions
 - Maps: `react-native-maps` + clustering; geospatial radius search via
-  client-computed geohashes (`src/services/geo.ts`) — Firestore has no native
-  "within N km" query
-- Breed classification: Cloud Function (`functions/src/classifyBreed.ts`)
+  client-computed geohashes (`src/services/geo.ts`) — no PostGIS, so we bound
+  by geohash prefix range in Postgres and cut precisely client-side
+- Breed classification: Edge Function (`supabase/functions/classify-breed`)
   proxying to the Roboflow-hosted `cat-breeds-2n7zk/2` model — the API key
   never ships in the app
 
@@ -20,29 +20,30 @@ which instead offers a manual "add to an existing cat" picker.
 
 ## First-time setup
 
-1. **Firebase project**: create one at console.firebase.google.com, enable
-   Anonymous Auth, Firestore, and Storage.
-2. Copy `.env.example` to `.env` and fill in the Firebase web config values
-   (Project settings > General > Your apps).
-3. `firebase use --add` to point the CLI at your project, then:
+1. **Supabase project**: create one at supabase.com/dashboard, then in
+   Authentication > Providers, enable "Allow anonymous sign-ins".
+2. Copy `.env.example` to `.env` and fill in the project URL and anon key
+   (Project Settings > API).
+3. Link the CLI and apply the schema (tables, RLS policies, storage bucket,
+   the sighting-denormalization/achievements trigger):
    ```
-   firebase deploy --only firestore:rules,storage
+   npx supabase login
+   npx supabase link --project-ref <your-project-ref>
+   npx supabase db push
    ```
 4. **Roboflow secret**: rotate/create an API key in your Roboflow account,
-   then set it for deployed functions:
+   then set it for the deployed function:
    ```
-   firebase functions:secrets:set ROBOFLOW_API_KEY
+   npx supabase secrets set ROBOFLOW_API_KEY=<your-key>
    ```
-   For local emulator testing, copy `functions/.secret.local.example` to
-   `functions/.secret.local` instead.
-5. Deploy functions: `cd functions && npm install && firebase deploy --only functions`
+5. Deploy the function: `npx supabase functions deploy classify-breed`
 6. Reconcile `src/data/breeds.ts` — the `modelLabels` are a best guess at the
    Roboflow model's actual class names; check them against the model's
    Versions page before relying on classification results.
 
 ## Running the app
 
-Needs a custom dev client (Firebase's native SDK isn't in Expo Go):
+Needs a custom dev client (Supabase's realtime/storage SDKs aren't in Expo Go):
 
 ```
 npx expo install
@@ -53,9 +54,11 @@ npx expo run:ios      # or: npx expo run:android
 
 - `src/screens` — the 8 screens (Map, Camera, New Sighting, Breed Search, Cat
   Detail, Collection, Profile, Privacy)
-- `src/services` — Firebase/Firestore/Storage access, geohashing, breed
+- `src/services` — Supabase (Postgres/Storage/Auth) access, geohashing, breed
   classification client
-- `functions/src` — `classifyBreed` (Roboflow proxy) and `onSightingCreated`
-  (denormalizes sighting counts, unlocks achievements)
-- `firestore.rules` / `storage.rules` — owner-only access, scoped to
-  `users/{uid}/...`
+- `supabase/migrations` — schema, RLS policies, storage bucket/policies, and
+  the `handle_new_sighting` trigger (denormalizes sighting counts, recomputes
+  stats, unlocks achievements — replaces a Firestore-trigger Cloud Function)
+- `supabase/functions/classify-breed` — Roboflow proxy Edge Function
+- RLS policies in `supabase/migrations/0001_init.sql` — owner-only access,
+  scoped to `auth.uid()`

@@ -17,9 +17,9 @@ export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: numb
 }
 
 /**
- * Geohash range bounds covering a radius search. Firestore has no native
- * "within N km" query, so we bound by geohash prefix range server-side and
- * do the precise haversine cut client-side (see filterWithinRadius).
+ * Geohash range bounds covering a radius search. Postgres has no native
+ * "within N km" query without PostGIS, so we bound by geohash prefix range
+ * server-side and do the precise haversine cut client-side (see filterWithinRadius).
  */
 export function geohashQueryBounds(lat: number, lng: number, radiusKm: number): Array<[string, string]> {
   const bounds = ngeohash.bboxes(

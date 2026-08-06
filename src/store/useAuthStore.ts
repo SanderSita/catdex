@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ensureSignedIn } from '../services/firebase';
+import { ensureSignedIn } from '../services/supabase';
 import { ensureUserProfile } from '../services/userService';
 
 interface AuthState {
@@ -16,8 +16,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   init: async () => {
     try {
       const user = await ensureSignedIn();
-      await ensureUserProfile(user.uid);
-      set({ uid: user.uid, ready: true });
+      await ensureUserProfile(user.id);
+      set({ uid: user.id, ready: true });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : String(err), ready: true });
     }

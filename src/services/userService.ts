@@ -1,5 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
-import { db } from './firebase';
+import { supabase } from './supabase';
 import type { UserStats } from '../types/models';
 
 export interface UserProfile {
@@ -11,46 +10,62 @@ export interface UserProfile {
   stats: UserStats;
 }
 
-const DEFAULT_STATS: UserStats = { catsFound: 0, breedsUnlocked: 0, dayStreak: 0 };
+interface ProfileRow {
+  display_name: string;
+  avatar_url: string | null;
+  joined_at: string;
+  default_radius_km: number;
+  notifications_enabled: boolean;
+  cats_found: number;
+  breeds_unlocked: number;
+  day_streak: number;
+}
 
-const DEFAULTS: Omit<UserProfile, 'joinedAt'> = {
-  displayName: 'New Catcher',
-  avatarUrl: null,
-  defaultRadiusKm: 3,
-  notificationsEnabled: true,
-  stats: DEFAULT_STATS,
-};
-
-function userDoc(uid: string) {
-  return doc(db, 'users', uid);
+function mapProfileRow(row: ProfileRow): UserProfile {
+  return {
+    displayName: row.display_name,
+    avatarUrl: row.avatar_url,
+    joinedAt: new Date(row.joined_at).getTime(),
+    defaultRadiusKm: row.default_radius_km,
+    notificationsEnabled: row.notifications_enabled,
+    stats: {
+      catsFound: row.cats_found,
+      breedsUnlocked: row.breeds_unlocked,
+      dayStreak: row.day_streak,
+    },
+  };
 }
 
 export async function ensureUserProfile(uid: string): Promise<void> {
-  const ref = userDoc(uid);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, { ...DEFAULTS, joinedAt: serverTimestamp() });
-  }
+  const { error } = await supabase.from('profiles').upsert({ id: uid }, { onConflict: 'id', ignoreDuplicates: true });
+  if (error) throw error;
 }
 
 export function subscribeToUserProfile(uid: string, onChange: (profile: UserProfile | null) => void) {
-  return onSnapshot(userDoc(uid), (snap) => {
-    if (!snap.exists()) {
-      onChange(null);
-      return;
-    }
-    const data = snap.data();
-    onChange({
-      displayName: data.displayName ?? DEFAULTS.displayName,
-      avatarUrl: data.avatarUrl ?? null,
-      joinedAt: data.joinedAt?.toMillis?.() ?? Date.now(),
-      defaultRadiusKm: data.defaultRadiusKm ?? DEFAULTS.defaultRadiusKm,
-      notificationsEnabled: data.notificationsEnabled ?? DEFAULTS.notificationsEnabled,
-      stats: { ...DEFAULT_STATS, ...(data.stats ?? {}) },
-    });
-  });
+  const load = async () => {
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
+    if (error) return;
+    onChange(data ? mapProfileRow(data as ProfileRow) : null);
+  };
+  load();
+
+  const channel = supabase
+    .channel(`profile:${uid}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${uid}` }, load)
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }
 
 export async function updateUserSettings(uid: string, patch: Partial<Pick<UserProfile, 'defaultRadiusKm' | 'notificationsEnabled'>>): Promise<void> {
-  await updateDoc(userDoc(uid), patch);
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      ...(patch.defaultRadiusKm !== undefined && { default_radius_km: patch.defaultRadiusKm }),
+      ...(patch.notificationsEnabled !== undefined && { notifications_enabled: patch.notificationsEnabled }),
+    })
+    .eq('id', uid);
+  if (error) throw error;
 }

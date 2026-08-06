@@ -1,9 +1,6 @@
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { db } from './firebase';
+import { supabase } from './supabase';
 import { BREEDS, breedIdFromModelLabel, breedNameById } from '../data/breeds';
 import type { Breed } from '../types/models';
-
-const functions = getFunctions(db.app);
 
 interface ClassifyBreedResponse {
   label: string;
@@ -17,18 +14,21 @@ export interface BreedGuess {
 }
 
 /**
- * Calls the classifyBreed Cloud Function, which proxies to the Roboflow
+ * Calls the classify-breed Edge Function, which proxies to the Roboflow
  * "cat-breeds-2n7zk/2" hosted model server-side (keeps the API key out of
  * the client). photoUrl must already be a reachable Storage download URL.
  */
 export async function classifyBreed(photoUrl: string): Promise<BreedGuess> {
-  const call = httpsCallable<{ photoUrl: string }, ClassifyBreedResponse>(functions, 'classifyBreed');
-  const result = await call({ photoUrl });
-  const breedId = breedIdFromModelLabel(result.data.label);
+  const { data, error } = await supabase.functions.invoke<ClassifyBreedResponse>('classify-breed', {
+    body: { photoUrl },
+  });
+  if (error) throw error;
+  if (!data) throw new Error('Classifier returned no data.');
+  const breedId = breedIdFromModelLabel(data.label);
   return {
     breedId,
-    breedName: breedId ? breedNameById(breedId) : result.data.label,
-    confidencePercent: Math.round(result.data.confidence * 100),
+    breedName: breedId ? breedNameById(breedId) : data.label,
+    confidencePercent: Math.round(data.confidence * 100),
   };
 }
 

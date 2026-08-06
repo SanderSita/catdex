@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { signOut } from 'firebase/auth';
 import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUserProfile } from '../hooks/useUserProfile';
-import { auth } from '../services/firebase';
+import { supabase } from '../services/supabase';
 import { updateUserSettings } from '../services/userService';
 import { subscribeToUnlockedAchievements } from '../services/achievementsService';
 import { ACHIEVEMENTS } from '../data/achievements';
@@ -91,7 +90,7 @@ export function ProfileScreen({ navigation }: Props) {
                 onPress={toggleNotifications}
               />
               <SettingsRow title="Privacy" onPress={() => navigation.navigate('Privacy')} />
-              <SettingsRow title="Log out" chevron={false} isLast onPress={() => signOut(auth)} />
+              <SettingsRow title="Log out" chevron={false} isLast onPress={() => supabase.auth.signOut()} />
             </SettingsSection>
           </View>
         </View>

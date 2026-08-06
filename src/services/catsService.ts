@@ -1,42 +1,74 @@
-import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  getDocs,
-  getDoc,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  serverTimestamp,
-  Timestamp,
-} from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage, ensureSignedIn } from './firebase';
+import { supabase, ensureSignedIn } from './supabase';
 import { encodeGeohash, geohashQueryBounds, filterWithinRadius } from './geo';
 import type { CatRecord, Sighting } from '../types/models';
 
-function catsCollection(uid: string) {
-  return collection(db, 'users', uid, 'cats');
+interface CatRow {
+  id: string;
+  name: string;
+  breed_id: string | null;
+  breed_name: string;
+  primary_photo_url: string;
+  geohash: string;
+  lat: number;
+  lng: number;
+  location_label: string;
+  first_seen_at: string;
+  last_seen_at: string;
+  sighting_count: number;
 }
 
-function sightingsCollection(uid: string, catId: string) {
-  return collection(db, 'users', uid, 'cats', catId, 'sightings');
+interface SightingRow {
+  id: string;
+  photo_url: string;
+  geohash: string;
+  lat: number;
+  lng: number;
+  location_label: string;
+  captured_at: string;
+  breed_guess: string | null;
+  breed_confidence: number | null;
 }
 
-function toMillis(v: Timestamp | number | undefined): number {
-  if (!v) return Date.now();
-  return typeof v === 'number' ? v : v.toMillis();
+function mapCatRow(row: CatRow): CatRecord {
+  return {
+    id: row.id,
+    name: row.name,
+    breedId: row.breed_id,
+    breedName: row.breed_name,
+    primaryPhotoUrl: row.primary_photo_url,
+    geohash: row.geohash,
+    lat: row.lat,
+    lng: row.lng,
+    locationLabel: row.location_label,
+    firstSeenAt: new Date(row.first_seen_at).getTime(),
+    lastSeenAt: new Date(row.last_seen_at).getTime(),
+    sightingCount: row.sighting_count,
+  };
+}
+
+function mapSightingRow(row: SightingRow): Sighting {
+  return {
+    id: row.id,
+    photoUrl: row.photo_url,
+    geohash: row.geohash,
+    lat: row.lat,
+    lng: row.lng,
+    locationLabel: row.location_label,
+    capturedAt: new Date(row.captured_at).getTime(),
+    breedGuess: row.breed_guess,
+    breedConfidence: row.breed_confidence,
+  };
 }
 
 export async function uploadCatPhoto(uid: string, localUri: string): Promise<string> {
   const response = await fetch(localUri);
-  const blob = await response.blob();
-  const path = `users/${uid}/cats/${Date.now()}.jpg`;
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, blob, { contentType: 'image/jpeg' });
-  return getDownloadURL(storageRef);
+  const arrayBuffer = await response.arrayBuffer();
+  const path = `${uid}/${Date.now()}.jpg`;
+  const { error } = await supabase.storage
+    .from('cat-photos')
+    .upload(path, arrayBuffer, { contentType: 'image/jpeg' });
+  if (error) throw error;
+  return supabase.storage.from('cat-photos').getPublicUrl(path).data.publicUrl;
 }
 
 export interface NewSightingInput {
@@ -55,106 +87,99 @@ export interface NewSightingInput {
 export async function saveSighting(input: NewSightingInput): Promise<string> {
   const user = await ensureSignedIn();
   const geohash = encodeGeohash(input.lat, input.lng);
-  const now = serverTimestamp();
 
+  let catId: string;
   if (input.existingCatId) {
-    const catRef = doc(db, 'users', user.uid, 'cats', input.existingCatId);
-    await addDoc(sightingsCollection(user.uid, input.existingCatId), {
-      photoUrl: input.photoUrl,
-      geohash,
-      lat: input.lat,
-      lng: input.lng,
-      locationLabel: input.locationLabel,
-      capturedAt: now,
-      breedGuess: input.breedName,
-      breedConfidence: input.breedConfidence,
-    });
-    await updateDoc(catRef, { lastSeenAt: now });
-    return input.existingCatId;
+    catId = input.existingCatId;
+  } else {
+    const { data: cat, error: catError } = await supabase
+      .from('cats')
+      .insert({
+        user_id: user.id,
+        name: input.name,
+        breed_id: input.breedId,
+        breed_name: input.breedName,
+        primary_photo_url: input.photoUrl,
+        geohash,
+        lat: input.lat,
+        lng: input.lng,
+        location_label: input.locationLabel,
+      })
+      .select('id')
+      .single();
+    if (catError) throw catError;
+    catId = cat.id;
   }
 
-  const catDoc = await addDoc(catsCollection(user.uid), {
-    name: input.name,
-    breedId: input.breedId,
-    breedName: input.breedName,
-    primaryPhotoUrl: input.photoUrl,
+  const { error: sightingError } = await supabase.from('sightings').insert({
+    cat_id: catId,
+    user_id: user.id,
+    photo_url: input.photoUrl,
     geohash,
     lat: input.lat,
     lng: input.lng,
-    locationLabel: input.locationLabel,
-    firstSeenAt: now,
-    lastSeenAt: now,
-    sightingCount: 1,
+    location_label: input.locationLabel,
+    breed_guess: input.breedName,
+    breed_confidence: input.breedConfidence,
   });
-  await addDoc(sightingsCollection(user.uid, catDoc.id), {
-    photoUrl: input.photoUrl,
-    geohash,
-    lat: input.lat,
-    lng: input.lng,
-    locationLabel: input.locationLabel,
-    capturedAt: now,
-    breedGuess: input.breedName,
-    breedConfidence: input.breedConfidence,
-  });
-  return catDoc.id;
-}
+  if (sightingError) throw sightingError;
 
-function mapCatDoc(d: { id: string; data: () => Record<string, unknown> }): CatRecord {
-  const data = d.data() as Record<string, unknown>;
-  return {
-    id: d.id,
-    name: (data.name as string) ?? 'Unnamed',
-    breedId: (data.breedId as string | null) ?? null,
-    breedName: (data.breedName as string) ?? 'Unknown',
-    primaryPhotoUrl: (data.primaryPhotoUrl as string) ?? '',
-    geohash: (data.geohash as string) ?? '',
-    lat: (data.lat as number) ?? 0,
-    lng: (data.lng as number) ?? 0,
-    locationLabel: (data.locationLabel as string) ?? '',
-    firstSeenAt: toMillis(data.firstSeenAt as Timestamp | undefined),
-    lastSeenAt: toMillis(data.lastSeenAt as Timestamp | undefined),
-    sightingCount: (data.sightingCount as number) ?? 1,
-  };
+  return catId;
 }
 
 /** All of the signed-in user's cats, live. Radius filtering happens client-side. */
 export function subscribeToUserCats(uid: string, onChange: (cats: CatRecord[]) => void) {
-  return onSnapshot(catsCollection(uid), (snap) => {
-    onChange(snap.docs.map(mapCatDoc));
-  });
+  const load = async () => {
+    const { data, error } = await supabase.from('cats').select('*').eq('user_id', uid);
+    if (error) return;
+    onChange((data as CatRow[]).map(mapCatRow));
+  };
+  load();
+
+  const channel = supabase
+    .channel(`cats:${uid}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'cats', filter: `user_id=eq.${uid}` }, load)
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }
 
 export async function fetchNearbyCats(uid: string, lat: number, lng: number, radiusKm: number): Promise<CatRecord[]> {
   const bounds = geohashQueryBounds(lat, lng, radiusKm);
   const results = new Map<string, CatRecord>();
   for (const [start, end] of bounds) {
-    const q = query(catsCollection(uid), where('geohash', '>=', start), where('geohash', '<', end));
-    const snap = await getDocs(q);
-    snap.docs.forEach((d) => results.set(d.id, mapCatDoc(d)));
+    const { data, error } = await supabase
+      .from('cats')
+      .select('*')
+      .eq('user_id', uid)
+      .gte('geohash', start)
+      .lt('geohash', end);
+    if (error) throw error;
+    (data as CatRow[]).forEach((row) => results.set(row.id, mapCatRow(row)));
   }
   return filterWithinRadius(Array.from(results.values()), lat, lng, radiusKm);
 }
 
 export async function fetchCat(uid: string, catId: string): Promise<CatRecord | null> {
-  const snap = await getDoc(doc(db, 'users', uid, 'cats', catId));
-  return snap.exists() ? mapCatDoc(snap) : null;
+  const { data, error } = await supabase
+    .from('cats')
+    .select('*')
+    .eq('id', catId)
+    .eq('user_id', uid)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapCatRow(data as CatRow) : null;
 }
 
 export async function fetchSightings(uid: string, catId: string): Promise<Sighting[]> {
-  const q = query(sightingsCollection(uid, catId), orderBy('capturedAt', 'desc'));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => {
-    const data = d.data() as Record<string, unknown>;
-    return {
-      id: d.id,
-      photoUrl: (data.photoUrl as string) ?? '',
-      geohash: (data.geohash as string) ?? '',
-      lat: (data.lat as number) ?? 0,
-      lng: (data.lng as number) ?? 0,
-      locationLabel: (data.locationLabel as string) ?? '',
-      capturedAt: toMillis(data.capturedAt as Timestamp | undefined),
-      breedGuess: (data.breedGuess as string | null) ?? null,
-      breedConfidence: (data.breedConfidence as number | null) ?? null,
-    };
-  });
+  const { data, error } = await supabase
+    .from('sightings')
+    .select('*')
+    .eq('user_id', uid)
+    .eq('cat_id', catId)
+    .order('captured_at', { ascending: false });
+  if (error) throw error;
+  return (data as SightingRow[]).map(mapSightingRow);
 }

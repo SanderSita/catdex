@@ -33,10 +33,10 @@ yarn-error.*
 # local env files
 .env
 .env*.local
-functions/.env
-functions/.secret.local
-functions/lib/
-functions/node_modules/
+
+# Supabase CLI
+supabase/.temp
+supabase/.branches
 
 # typescript
 *.tsbuildinfo
