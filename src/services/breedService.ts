@@ -1,0 +1,39 @@
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { db } from './firebase';
+import { BREEDS, breedIdFromModelLabel, breedNameById } from '../data/breeds';
+import type { Breed } from '../types/models';
+
+const functions = getFunctions(db.app);
+
+interface ClassifyBreedResponse {
+  label: string;
+  confidence: number;
+}
+
+export interface BreedGuess {
+  breedId: string | null;
+  breedName: string;
+  confidencePercent: number;
+}
+
+/**
+ * Calls the classifyBreed Cloud Function, which proxies to the Roboflow
+ * "cat-breeds-2n7zk/2" hosted model server-side (keeps the API key out of
+ * the client). photoUrl must already be a reachable Storage download URL.
+ */
+export async function classifyBreed(photoUrl: string): Promise<BreedGuess> {
+  const call = httpsCallable<{ photoUrl: string }, ClassifyBreedResponse>(functions, 'classifyBreed');
+  const result = await call({ photoUrl });
+  const breedId = breedIdFromModelLabel(result.data.label);
+  return {
+    breedId,
+    breedName: breedId ? breedNameById(breedId) : result.data.label,
+    confidencePercent: Math.round(result.data.confidence * 100),
+  };
+}
+
+export function searchBreeds(query: string): Breed[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return BREEDS;
+  return BREEDS.filter((b) => b.name.toLowerCase().includes(q));
+}
