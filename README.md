@@ -50,6 +50,25 @@ npx expo install
 npx expo run:ios      # or: npx expo run:android
 ```
 
+### Running on a physical Android device
+
+1. On the device: Settings > About phone, tap "Build number" 7 times to
+   unlock Developer options, then Settings > Developer options > enable
+   "USB debugging".
+2. Connect the device via USB and accept the "Allow USB debugging?" prompt
+   that appears on screen.
+3. Verify the computer sees it: `adb devices` should list it as `device`
+   (not `unauthorized` — if so, re-check the on-device prompt).
+4. From the project root: `npx expo run:android`. This builds the native
+   app from the checked-in `android/` project, installs it on the connected
+   device, and starts Metro — no emulator needed. If more than one device/
+   emulator is attached, pass `--device` to pick which one.
+
+Prefer wireless over USB? Android 11+ supports pairing over Wi-Fi: Settings >
+Developer options > Wireless debugging > "Pair device with pairing code",
+then `adb pair <ip>:<port>` and `adb connect <ip>:<port>` with the values
+shown on screen before running `npx expo run:android`.
+
 ## Project layout
 
 - `src/screens` — the 8 screens (Map, Camera, New Sighting, Breed Search, Cat

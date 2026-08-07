@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUserCats } from '../hooks/useUserCats';
@@ -13,11 +15,43 @@ type Props = TabScreenProps<'Collection'>;
 
 type Tab = 'breeds' | 'cats';
 
+const TABS: Tab[] = ['breeds', 'cats'];
+
 export function CollectionScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const uid = useAuthStore((s) => s.uid);
   const cats = useUserCats(uid);
   const [tab, setTab] = useState<Tab>('breeds');
+  const translateX = useSharedValue(0);
+
+  const goToTab = (next: Tab) => {
+    setTab(next);
+    translateX.value = withTiming(-TABS.indexOf(next) * width, { duration: 250 });
+  };
+
+  const panGesture = Gesture.Pan()
+    .activeOffsetX([-10, 10])
+    .failOffsetY([-10, 10])
+    .onUpdate((e) => {
+      const base = -TABS.indexOf(tab) * width;
+      translateX.value = base + e.translationX;
+    })
+    .onEnd((e) => {
+      const currentIndex = TABS.indexOf(tab);
+      let nextIndex = currentIndex;
+      if (e.translationX < -width * 0.25 || e.velocityX < -500) {
+        nextIndex = Math.min(currentIndex + 1, TABS.length - 1);
+      } else if (e.translationX > width * 0.25 || e.velocityX > 500) {
+        nextIndex = Math.max(currentIndex - 1, 0);
+      }
+      translateX.value = withTiming(-nextIndex * width, { duration: 250 });
+      runOnJS(setTab)(TABS[nextIndex]);
+    });
+
+  const pagerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
 
   const breedTiles = useMemo(() => {
     return BREEDS.map((breed) => {
@@ -45,7 +79,7 @@ export function CollectionScreen({ navigation }: Props) {
       <View style={styles.tabRow}>
         <Pressable
           style={[styles.tabButton, tab === 'breeds' ? styles.tabButtonActive : styles.tabButtonInactive]}
-          onPress={() => setTab('breeds')}
+          onPress={() => goToTab('breeds')}
         >
           <Text style={[styles.tabLabel, tab === 'breeds' ? styles.tabLabelActive : styles.tabLabelInactive]}>
             Breeds
@@ -53,7 +87,7 @@ export function CollectionScreen({ navigation }: Props) {
         </Pressable>
         <Pressable
           style={[styles.tabButton, tab === 'cats' ? styles.tabButtonActive : styles.tabButtonInactive]}
-          onPress={() => setTab('cats')}
+          onPress={() => goToTab('cats')}
         >
           <Text style={[styles.tabLabel, tab === 'cats' ? styles.tabLabelActive : styles.tabLabelInactive]}>
             My Cats
@@ -61,46 +95,59 @@ export function CollectionScreen({ navigation }: Props) {
         </Pressable>
       </View>
 
-      {tab === 'breeds' ? (
-        <FlatList
-          data={breedTiles}
-          keyExtractor={(item) => item.breed.id}
-          numColumns={3}
-          columnWrapperStyle={{ gap: 10 }}
-          contentContainerStyle={styles.grid}
-          renderItem={({ item }) => (
-            <View style={styles.gridCell}>
-              {item.unlocked ? (
-                <CatThumb uri={item.photoUrl} shape="rounded" />
-              ) : (
-                <View style={styles.lockedTile}>
-                  <View style={styles.lockedDot} />
-                </View>
-              )}
-              <Text style={[styles.tileLabel, item.unlocked ? styles.tileLabelUnlocked : null]} numberOfLines={1}>
-                {item.breed.name}
-              </Text>
+      <GestureDetector gesture={panGesture}>
+        <View style={styles.pagerViewport}>
+          <Animated.View style={[styles.pager, { width: width * TABS.length }, pagerStyle]}>
+            <View style={{ width }}>
+              <FlatList
+                data={breedTiles}
+                keyExtractor={(item) => item.breed.id}
+                numColumns={3}
+                columnWrapperStyle={{ gap: 10 }}
+                contentContainerStyle={styles.grid}
+                renderItem={({ item }) => (
+                  <View style={styles.gridCell}>
+                    {item.unlocked ? (
+                      <CatThumb uri={item.photoUrl} shape="rounded" />
+                    ) : (
+                      <View style={styles.lockedTile}>
+                        <View style={styles.lockedDot} />
+                      </View>
+                    )}
+                    <Text
+                      style={[styles.tileLabel, item.unlocked ? styles.tileLabelUnlocked : null]}
+                      numberOfLines={1}
+                    >
+                      {item.breed.name}
+                    </Text>
+                  </View>
+                )}
+              />
             </View>
-          )}
-        />
-      ) : (
-        <FlatList
-          data={cats}
-          keyExtractor={(item) => item.id}
-          numColumns={3}
-          columnWrapperStyle={{ gap: 10 }}
-          contentContainerStyle={styles.grid}
-          renderItem={({ item }) => (
-            <Pressable style={styles.gridCell} onPress={() => navigation.navigate('CatDetail', { catId: item.id })}>
-              <CatThumb uri={item.primaryPhotoUrl} shape="rounded" />
-              <Text style={styles.tileLabelUnlocked} numberOfLines={1}>
-                {item.name}
-              </Text>
-            </Pressable>
-          )}
-          ListEmptyComponent={<Text style={styles.emptyText}>No cats caught yet — go find one!</Text>}
-        />
-      )}
+            <View style={{ width }}>
+              <FlatList
+                data={cats}
+                keyExtractor={(item) => item.id}
+                numColumns={3}
+                columnWrapperStyle={{ gap: 10 }}
+                contentContainerStyle={styles.grid}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={styles.gridCell}
+                    onPress={() => navigation.navigate('CatDetail', { catId: item.id })}
+                  >
+                    <CatThumb uri={item.primaryPhotoUrl} shape="rounded" />
+                    <Text style={styles.tileLabelUnlocked} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+                  </Pressable>
+                )}
+                ListEmptyComponent={<Text style={styles.emptyText}>No cats caught yet — go find one!</Text>}
+              />
+            </View>
+          </Animated.View>
+        </View>
+      </GestureDetector>
     </View>
   );
 }
@@ -119,6 +166,8 @@ const styles = StyleSheet.create({
   tabLabel: { fontFamily: fonts.bodyBold, fontSize: 14 },
   tabLabelActive: { color: colors.white },
   tabLabelInactive: { color: colors.textMid },
+  pagerViewport: { flex: 1, overflow: 'hidden' },
+  pager: { flex: 1, flexDirection: 'row' },
   grid: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 24, gap: 10 },
   gridCell: { flex: 1 / 3, alignItems: 'center', gap: 6 },
   lockedTile: {

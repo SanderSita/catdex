@@ -137,7 +137,7 @@ export function subscribeToUserCats(uid: string, onChange: (cats: CatRecord[]) =
   load();
 
   const channel = supabase
-    .channel(`cats:${uid}`)
+    .channel(`cats:${uid}:${Math.random().toString(36).slice(2)}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'cats', filter: `user_id=eq.${uid}` }, load)
     .subscribe();
 

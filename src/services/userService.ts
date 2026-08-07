@@ -50,7 +50,7 @@ export function subscribeToUserProfile(uid: string, onChange: (profile: UserProf
   load();
 
   const channel = supabase
-    .channel(`profile:${uid}`)
+    .channel(`profile:${uid}:${Math.random().toString(36).slice(2)}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${uid}` }, load)
     .subscribe();
 

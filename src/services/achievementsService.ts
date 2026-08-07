@@ -9,7 +9,7 @@ export function subscribeToUnlockedAchievements(uid: string, onChange: (unlocked
   load();
 
   const channel = supabase
-    .channel(`unlocked-achievements:${uid}`)
+    .channel(`unlocked-achievements:${uid}:${Math.random().toString(36).slice(2)}`)
     .on(
       'postgres_changes',
       { event: '*', schema: 'public', table: 'unlocked_achievements', filter: `user_id=eq.${uid}` },
