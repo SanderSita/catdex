@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions, type CameraType, type FlashMode } from 'expo-camera';
+import { X, Zap, ZapOff, SwitchCamera } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
@@ -42,13 +43,17 @@ export function CameraScreen({ navigation }: Props) {
 
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <Pressable style={styles.roundButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.iconText}>✕</Text>
+          <X size={18} color={colors.white} />
         </Pressable>
         <Pressable
           style={styles.roundButton}
           onPress={() => setFlash((f) => (f === 'off' ? 'on' : 'off'))}
         >
-          <Text style={styles.iconText}>{flash === 'off' ? '⚡︎' : '⚡︎ On'}</Text>
+          {flash === 'off' ? (
+            <ZapOff size={18} color={colors.white} />
+          ) : (
+            <Zap size={18} color={colors.white} />
+          )}
         </Pressable>
       </View>
 
@@ -71,7 +76,7 @@ export function CameraScreen({ navigation }: Props) {
           style={styles.roundButtonSmall}
           onPress={() => setFacing((f) => (f === 'back' ? 'front' : 'back'))}
         >
-          <Text style={styles.iconText}>⟲</Text>
+          <SwitchCamera size={20} color={colors.white} />
         </Pressable>
       </View>
     </View>
@@ -109,7 +114,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconText: { color: colors.white, fontSize: 16 },
   viewfinderFrame: {
     position: 'absolute',
     top: 130,

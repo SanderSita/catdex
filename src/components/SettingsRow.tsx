@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ChevronRight } from 'lucide-react-native';
 import { colors, fonts } from '../theme';
 
 interface SettingsRowProps {
@@ -16,7 +17,7 @@ export function SettingsRow({ title, detail, chevron = true, isLast, onPress }: 
       <Text style={styles.title}>{title}</Text>
       <View style={styles.right}>
         {detail ? <Text style={styles.detail}>{detail}</Text> : null}
-        {chevron ? <Text style={styles.chevron}>{'›'}</Text> : null}
+        {chevron ? <ChevronRight size={18} color={colors.textLight} /> : null}
       </View>
     </Pressable>
   );
@@ -71,9 +72,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 14,
     color: colors.textMuted,
-  },
-  chevron: {
-    fontSize: 18,
-    color: colors.textLight,
   },
 });

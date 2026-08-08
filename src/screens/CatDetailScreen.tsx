@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
@@ -58,7 +59,7 @@ export function CatDetailScreen({ route, navigation }: Props) {
           <View style={styles.photoWrap}>
             <CatThumb uri={cat.primaryPhotoUrl} shape="rect" />
             <Pressable style={[styles.roundButton, { top: insets.top + 12, left: 16 }]} onPress={() => navigation.goBack()}>
-              <Text style={styles.roundButtonIcon}>{'‹'}</Text>
+              <ChevronLeft size={20} color={colors.textDark} />
             </Pressable>
           </View>
 
@@ -111,7 +112,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  roundButtonIcon: { fontSize: 18, color: colors.textDark },
   infoSection: { paddingHorizontal: 20, paddingTop: 18 },
   nameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   name: { fontFamily: fonts.headingSemi, fontSize: 24, color: colors.textDark },

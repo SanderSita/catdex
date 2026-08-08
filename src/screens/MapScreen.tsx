@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Camera, ChevronDown } from 'lucide-react-native';
 import { Circle, Marker } from 'react-native-maps';
 import MapView from 'react-native-map-clustering';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,7 +45,7 @@ export function MapScreen({ navigation }: Props) {
         <Text style={styles.title}>CatDex</Text>
         <Pressable style={styles.radiusChip} onPress={() => setPickerOpen(true)}>
           <Text style={styles.radiusText}>{radiusKm} km radius</Text>
-          <Text style={styles.chevronDown}>{'▾'}</Text>
+          <ChevronDown size={14} color={colors.tealTextSoft} />
         </Pressable>
       </View>
 
@@ -88,7 +89,8 @@ export function MapScreen({ navigation }: Props) {
       </View>
 
       <Pressable style={styles.fab} onPress={openCamera}>
-        <View style={styles.fabInner} />
+        <Camera size={20} color={colors.white} strokeWidth={2.5} />
+        <Text style={styles.fabLabel}>New Sighting</Text>
       </Pressable>
 
       <BottomSheet ref={sheetRef} snapPoints={snapPoints} index={0} backgroundStyle={styles.sheetBg}>
@@ -158,7 +160,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   radiusText: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.tealTextSoft },
-  chevronDown: { color: colors.tealTextSoft, fontSize: 12 },
   mapWrap: { flex: 1, backgroundColor: colors.mapBg },
   mapLoading: { alignItems: 'center', justifyContent: 'center' },
   loadingText: { fontFamily: fonts.body, color: colors.textMuted },
@@ -175,20 +176,21 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    right: 22,
+    right: 20,
     bottom: 160,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.coral,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 8,
+    height: 52,
+    paddingHorizontal: 20,
+    borderRadius: 26,
+    backgroundColor: colors.coral,
     shadowColor: colors.coral,
     shadowOpacity: 0.45,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
   },
-  fabInner: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.white },
+  fabLabel: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.white },
   sheetBg: { backgroundColor: colors.card, borderTopLeftRadius: 26, borderTopRightRadius: 26 },
   sheetContent: { paddingHorizontal: 20, paddingTop: 4 },
   sheetTitle: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.textDark, marginBottom: 12 },

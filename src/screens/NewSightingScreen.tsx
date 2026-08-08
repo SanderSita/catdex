@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import * as Location from 'expo-location';
+import { X } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -120,7 +121,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <Pressable style={styles.closeButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.closeText}>✕</Text>
+          <X size={18} color={colors.textMid} />
         </Pressable>
         <View style={styles.newSightingBadge}>
           <Text style={styles.newSightingText}>New Sighting!</Text>
@@ -222,7 +223,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  closeText: { color: colors.textMid, fontSize: 14 },
   newSightingBadge: { backgroundColor: colors.coralBgSoft, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999 },
   newSightingText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.coralTextSoft },
   photoWrap: { paddingHorizontal: 20, paddingTop: 14, aspectRatio: 1, borderRadius: 24, overflow: 'hidden' },
