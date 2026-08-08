@@ -111,6 +111,7 @@ export async function saveSighting(input: NewSightingInput): Promise<string> {
     catId = cat.id;
   }
 
+  const now = new Date();
   const { error: sightingError } = await supabase.from('sightings').insert({
     cat_id: catId,
     user_id: user.id,
@@ -121,6 +122,8 @@ export async function saveSighting(input: NewSightingInput): Promise<string> {
     location_label: input.locationLabel,
     breed_guess: input.breedName,
     breed_confidence: input.breedConfidence,
+    captured_local_hour: now.getHours(),
+    captured_local_weekday: now.getDay(),
   });
   if (sightingError) throw sightingError;
 

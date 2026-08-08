@@ -9,7 +9,8 @@ export interface Achievement {
   id: string;
   label: string;
   color: string;
-  check: (stats: UserStats) => boolean;
+  /** 0-1 fraction toward unlocking, for badges with a meaningful threshold. Omit for boolean-only badges. */
+  progress?: (stats: UserStats) => number;
 }
 
 export interface UserStats {

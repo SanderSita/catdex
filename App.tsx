@@ -17,6 +17,7 @@ import {
 } from '@expo-google-fonts/rubik';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/store/useAuthStore';
+import { useAchievementsStore } from './src/store/useAchievementsStore';
 import { colors } from './src/theme';
 
 export default function App() {
@@ -28,13 +29,20 @@ export default function App() {
     Rubik_600SemiBold,
     Rubik_700Bold,
   });
+  const uid = useAuthStore((s) => s.uid);
   const authReady = useAuthStore((s) => s.ready);
   const authError = useAuthStore((s) => s.error);
   const init = useAuthStore((s) => s.init);
+  const subscribeAchievements = useAchievementsStore((s) => s.subscribe);
 
   useEffect(() => {
     init();
   }, [init]);
+
+  useEffect(() => {
+    if (!uid) return;
+    return subscribeAchievements(uid);
+  }, [uid, subscribeAchievements]);
 
   if (authError) {
     return (

@@ -16,13 +16,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
+import { useAchievementsStore } from '../store/useAchievementsStore';
 import { useBreedPickStore } from '../store/useBreedPickStore';
 import { uploadCatPhoto, saveSighting, subscribeToUserCats } from '../services/catsService';
+import { fetchUnlockedAchievementIds } from '../services/achievementsService';
 import { classifyBreed, type BreedGuess } from '../services/breedService';
 import { breedNameById } from '../data/breeds';
+import { ACHIEVEMENTS } from '../data/achievements';
 import { CatThumb } from '../components/CatThumb';
 import { PrimaryButton } from '../components/PrimaryButton';
-import type { CatRecord } from '../types/models';
+import { AchievementUnlockModal } from '../components/AchievementUnlockModal';
+import type { Achievement, CatRecord } from '../types/models';
 import { colors, fonts } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NewSighting'>;
@@ -42,6 +46,8 @@ export function NewSightingScreen({ route, navigation }: Props) {
   const [existingCatId, setExistingCatId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [unlockedQueue, setUnlockedQueue] = useState<Achievement[]>([]);
+  const [pendingCatId, setPendingCatId] = useState<string | null>(null);
 
   useEffect(() => {
     Location.reverseGeocodeAsync({ latitude: lat, longitude: lng })
@@ -98,6 +104,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
     if (!uploadedUrl) return;
     setSaving(true);
     setError(null);
+    const before = useAchievementsStore.getState().unlockedIds;
     try {
       const catId = await saveSighting({
         photoUrl: uploadedUrl,
@@ -110,11 +117,30 @@ export function NewSightingScreen({ route, navigation }: Props) {
         name: name.trim(),
         existingCatId: existingCatId ?? undefined,
       });
-      navigation.replace('CatDetail', { catId });
+
+      const newlyUnlocked = uid
+        ? [...(await fetchUnlockedAchievementIds(uid))]
+            .filter((id) => !before.has(id))
+            .map((id) => ACHIEVEMENTS.find((a) => a.id === id))
+            .filter((a): a is Achievement => Boolean(a))
+        : [];
+
+      if (newlyUnlocked.length > 0) {
+        setPendingCatId(catId);
+        setUnlockedQueue(newlyUnlocked);
+        setSaving(false);
+      } else {
+        navigation.replace('CatDetail', { catId });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save this sighting.');
       setSaving(false);
     }
+  };
+
+  const onCelebrationDone = () => {
+    setUnlockedQueue([]);
+    if (pendingCatId) navigation.replace('CatDetail', { catId: pendingCatId });
   };
 
   return (
@@ -202,6 +228,10 @@ export function NewSightingScreen({ route, navigation }: Props) {
       <View style={styles.section}>
         <PrimaryButton label={existingCatId ? 'Add sighting' : 'Add to CatDex'} onPress={onSave} disabled={!canSave} />
       </View>
+
+      {unlockedQueue.length > 0 ? (
+        <AchievementUnlockModal queue={unlockedQueue} onDone={onCelebrationDone} />
+      ) : null}
     </ScrollView>
   );
 }

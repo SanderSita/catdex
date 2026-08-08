@@ -1,5 +1,12 @@
 import { supabase } from './supabase';
 
+/** One-shot fetch, used to diff before/after a sighting save rather than waiting on realtime latency. */
+export async function fetchUnlockedAchievementIds(uid: string): Promise<Set<string>> {
+  const { data, error } = await supabase.from('unlocked_achievements').select('achievement_id').eq('user_id', uid);
+  if (error) throw error;
+  return new Set(data.map((row: { achievement_id: string }) => row.achievement_id));
+}
+
 export function subscribeToUnlockedAchievements(uid: string, onChange: (unlockedIds: Set<string>) => void) {
   const load = async () => {
     const { data, error } = await supabase.from('unlocked_achievements').select('achievement_id').eq('user_id', uid);

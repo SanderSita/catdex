@@ -10,6 +10,7 @@ import { subscribeToUnlockedAchievements } from '../services/achievementsService
 import { ACHIEVEMENTS } from '../data/achievements';
 import { CatThumb } from '../components/CatThumb';
 import { StatTile } from '../components/StatTile';
+import { AchievementBadge } from '../components/AchievementBadge';
 import { SettingsRow, SettingsSection } from '../components/SettingsRow';
 import { colors, fonts } from '../theme';
 
@@ -68,15 +69,7 @@ export function ProfileScreen({ navigation }: Props) {
             <Text style={styles.sectionTitle}>Achievements</Text>
             <View style={styles.achievementsGrid}>
               {ACHIEVEMENTS.map((a) => (
-                <View key={a.id} style={styles.achievementCell}>
-                  <View
-                    style={[
-                      styles.achievementCircle,
-                      { backgroundColor: a.color, opacity: unlocked.has(a.id) ? 1 : 0.3 },
-                    ]}
-                  />
-                  <Text style={styles.achievementLabel}>{a.label}</Text>
-                </View>
+                <AchievementBadge key={a.id} achievement={a} unlocked={unlocked.has(a.id)} stats={profile.stats} />
               ))}
             </View>
           </View>
@@ -111,8 +104,5 @@ const styles = StyleSheet.create({
   achievementsSection: { paddingHorizontal: 20, paddingTop: 20 },
   sectionTitle: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.textDark, marginBottom: 10 },
   achievementsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  achievementCell: { width: '30%', alignItems: 'center', gap: 6 },
-  achievementCircle: { width: 52, height: 52, borderRadius: 26 },
-  achievementLabel: { fontFamily: fonts.bodySemi, fontSize: 10.5, color: colors.textMid, textAlign: 'center' },
   settingsSection: { paddingHorizontal: 20, paddingTop: 22 },
 });
