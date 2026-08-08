@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUserProfile } from '../hooks/useUserProfile';
@@ -19,6 +20,7 @@ type Props = TabScreenProps<'Profile'>;
 const RADIUS_CYCLE = [1, 3, 5, 10];
 
 export function ProfileScreen({ navigation }: Props) {
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const uid = useAuthStore((s) => s.uid);
   const profile = useUserProfile(uid);
@@ -31,7 +33,7 @@ export function ProfileScreen({ navigation }: Props) {
 
   if (!profile) return <View style={styles.container} />;
 
-  const joinedLabel = new Date(profile.joinedAt).toLocaleDateString(undefined, {
+  const joinedLabel = new Date(profile.joinedAt).toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-US', {
     month: 'long',
     year: 'numeric',
   });
@@ -56,17 +58,17 @@ export function ProfileScreen({ navigation }: Props) {
           <View style={styles.avatarSection}>
             <CatThumb uri={profile.avatarUrl} shape="circle" size={88} />
             <Text style={styles.username}>{profile.displayName}</Text>
-            <Text style={styles.joined}>Catching since {joinedLabel}</Text>
+            <Text style={styles.joined}>{t('profile.catchingSince', { date: joinedLabel })}</Text>
           </View>
 
           <View style={styles.statsRow}>
-            <StatTile value={profile.stats.catsFound} label="Cats found" dark />
-            <StatTile value={profile.stats.breedsUnlocked} label="Breeds" dark />
-            <StatTile value={profile.stats.dayStreak} label="Day streak" dark />
+            <StatTile value={profile.stats.catsFound} label={t('profile.catsFound')} dark />
+            <StatTile value={profile.stats.breedsUnlocked} label={t('profile.breeds')} dark />
+            <StatTile value={profile.stats.dayStreak} label={t('profile.dayStreak')} dark />
           </View>
 
           <View style={styles.achievementsSection}>
-            <Text style={styles.sectionTitle}>Achievements</Text>
+            <Text style={styles.sectionTitle}>{t('profile.achievements')}</Text>
             <View style={styles.achievementsGrid}>
               {ACHIEVEMENTS.map((a) => (
                 <AchievementBadge key={a.id} achievement={a} unlocked={unlocked.has(a.id)} stats={profile.stats} />
@@ -75,15 +77,19 @@ export function ProfileScreen({ navigation }: Props) {
           </View>
 
           <View style={styles.settingsSection}>
-            <SettingsSection header="Settings">
-              <SettingsRow title="Default search radius" detail={`${profile.defaultRadiusKm} km`} onPress={cycleRadius} />
+            <SettingsSection header={t('profile.settingsHeader')}>
               <SettingsRow
-                title="Notifications"
-                detail={profile.notificationsEnabled ? 'On' : 'Off'}
+                title={t('profile.searchRadius')}
+                detail={t('map.radiusOption', { km: profile.defaultRadiusKm })}
+                onPress={cycleRadius}
+              />
+              <SettingsRow
+                title={t('profile.notifications')}
+                detail={profile.notificationsEnabled ? t('profile.on') : t('profile.off')}
                 onPress={toggleNotifications}
               />
-              <SettingsRow title="Privacy" onPress={() => navigation.navigate('Privacy')} />
-              <SettingsRow title="Log out" chevron={false} isLast onPress={() => supabase.auth.signOut()} />
+              <SettingsRow title={t('privacy.title')} onPress={() => navigation.navigate('Privacy')} />
+              <SettingsRow title={t('profile.logOut')} chevron={false} isLast onPress={() => supabase.auth.signOut()} />
             </SettingsSection>
           </View>
         </View>

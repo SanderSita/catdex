@@ -5,6 +5,7 @@ import { Circle, Marker } from 'react-native-maps';
 import MapView from 'react-native-map-clustering';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { useTranslation } from 'react-i18next';
 import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUserProfile } from '../hooks/useUserProfile';
@@ -18,6 +19,7 @@ const RADIUS_OPTIONS = [1, 3, 5, 10];
 type Props = TabScreenProps<'Map'>;
 
 export function MapScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const uid = useAuthStore((s) => s.uid);
   const profile = useUserProfile(uid);
@@ -42,9 +44,9 @@ export function MapScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <Text style={styles.title}>CatDex</Text>
+        <Text style={styles.title}>{t('map.title')}</Text>
         <Pressable style={styles.radiusChip} onPress={() => setPickerOpen(true)}>
-          <Text style={styles.radiusText}>{radiusKm} km radius</Text>
+          <Text style={styles.radiusText}>{t('map.radiusLabel', { km: radiusKm })}</Text>
           <ChevronDown size={14} color={colors.tealTextSoft} />
         </Pressable>
       </View>
@@ -83,19 +85,19 @@ export function MapScreen({ navigation }: Props) {
           </MapView>
         ) : (
           <View style={[StyleSheet.absoluteFill, styles.mapLoading]}>
-            <Text style={styles.loadingText}>Finding your location…</Text>
+            <Text style={styles.loadingText}>{t('map.locating')}</Text>
           </View>
         )}
       </View>
 
       <Pressable style={styles.fab} onPress={openCamera}>
         <Camera size={20} color={colors.white} strokeWidth={2.5} />
-        <Text style={styles.fabLabel}>New Sighting</Text>
+        <Text style={styles.fabLabel}>{t('map.newSighting')}</Text>
       </Pressable>
 
       <BottomSheet ref={sheetRef} snapPoints={snapPoints} index={0} backgroundStyle={styles.sheetBg}>
         <BottomSheetView style={styles.sheetContent}>
-          <Text style={styles.sheetTitle}>{nearby.length} cats nearby</Text>
+          <Text style={styles.sheetTitle}>{t('map.catsNearby', { count: nearby.length })}</Text>
           <FlatList
             horizontal
             data={nearby.slice(0, 3)}
@@ -130,7 +132,7 @@ export function MapScreen({ navigation }: Props) {
                   setPickerOpen(false);
                 }}
               >
-                <Text style={styles.pickerLabel}>{option} km</Text>
+                <Text style={styles.pickerLabel}>{t('map.radiusOption', { km: option })}</Text>
               </Pressable>
             ))}
           </View>

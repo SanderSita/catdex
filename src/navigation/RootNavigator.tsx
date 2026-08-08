@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import type { RootStackParamList } from './types';
 import { TabNavigator } from './TabNavigator';
 import { CameraScreen } from '../screens/CameraScreen';
@@ -10,6 +11,7 @@ import { PrivacyScreen } from '../screens/PrivacyScreen';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
+  const { t } = useTranslation();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Tabs" component={TabNavigator} />
@@ -17,7 +19,7 @@ export function RootNavigator() {
       <Stack.Screen name="NewSighting" component={NewSightingScreen} options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="BreedSearch" component={BreedSearchScreen} options={{ presentation: 'modal' }} />
       <Stack.Screen name="CatDetail" component={CatDetailScreen} />
-      <Stack.Screen name="Privacy" component={PrivacyScreen} options={{ headerShown: true, title: 'Privacy' }} />
+      <Stack.Screen name="Privacy" component={PrivacyScreen} options={{ headerShown: true, title: t('privacy.title') }} />
     </Stack.Navigator>
   );
 }

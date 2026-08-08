@@ -1,0 +1,107 @@
+{
+  "common": {
+    "unknown": "Onbekend"
+  },
+  "tabs": {
+    "map": "Kaart",
+    "collection": "CatDex",
+    "profile": "Profiel"
+  },
+  "map": {
+    "title": "CatDex",
+    "radiusLabel": "{{km}} km radius",
+    "radiusOption": "{{km}} km",
+    "locating": "Locatie zoeken…",
+    "newSighting": "Kat gevonden",
+    "catsNearby_one": "{{count}} kat in de buurt",
+    "catsNearby_other": "{{count}} katten in de buurt"
+  },
+  "collection": {
+    "title": "Mijn CatDex",
+    "progress": "{{unlocked}} van {{total}} rassen ontdekt",
+    "breedsTab": "Rassen",
+    "catsTab": "Mijn katten",
+    "empty": "Nog geen katten gevangen, ga er een zoeken!"
+  },
+  "camera": {
+    "permission": "CatDex heeft cameratoegang nodig om katten te fotograferen.",
+    "grantAccess": "Toegang geven",
+    "frameHint": "Zet de kat in beeld"
+  },
+  "newSighting": {
+    "locating": "Bezig met lokaliseren…",
+    "unknownLocation": "Onbekende locatie",
+    "identifyError": "Kon deze kat niet herkennen.",
+    "saveError": "Kon deze waarneming niet opslaan.",
+    "title": "Nieuwe kat gevonden!",
+    "suggestedBreed": "Voorgesteld ras",
+    "identifying": "Bezig met identificeren…",
+    "matchPercent": "{{confidence}}% overeenkomst",
+    "notRight": "Klopt dit niet? Zoek rassen",
+    "nameLabel": "Geef deze kat een naam",
+    "namePlaceholder": "bijv. Marmelade",
+    "existingCat": "Deze kat al eerder gezien? Voeg toe aan een bestaand item",
+    "addSighting": "Kat toevoegen",
+    "addToCatDex": "Toevoegen aan CatDex"
+  },
+  "catDetail": {
+    "sightings": "Waarnemingen",
+    "firstSeen": "Eerst gezien",
+    "lastSeen": "Laatst gezien",
+    "history": "Waarnemingsgeschiedenis"
+  },
+  "breedSearch": {
+    "title": "Zoek rassen",
+    "placeholder": "Zoeken…"
+  },
+  "profile": {
+    "catchingSince": "Aan het vangen sinds {{date}}",
+    "catsFound": "Katten gevonden",
+    "breeds": "Rassen",
+    "dayStreak": "Dagenreeks",
+    "achievements": "Prestaties",
+    "settingsHeader": "Instellingen",
+    "searchRadius": "Standaard zoekstraal",
+    "notifications": "Meldingen",
+    "on": "Aan",
+    "off": "Uit",
+    "logOut": "Uitloggen"
+  },
+  "privacy": {
+    "title": "Privacy",
+    "body": "Je waarnemingen en foto's zijn privé voor jouw account. Locatiegegevens worden alleen gebruikt om je katten op je eigen kaart te plaatsen en worden nooit gedeeld met andere gebruikers."
+  },
+  "achievementUnlock": {
+    "title": "Prestatie ontgrendeld!",
+    "progress": "{{current}} van {{total}}",
+    "nice": "Mooi!",
+    "next": "Volgende"
+  },
+  "errors": {
+    "connectionFailed": "Kon geen verbinding maken: {{error}}",
+    "signInFailed": "Anoniem inloggen is mislukt.",
+    "classifierNoData": "Classifier gaf geen gegevens terug."
+  },
+  "breeds": {
+    "abyssinian": "Abessijn",
+    "bengal": "Bengaal",
+    "birman": "Birmaan",
+    "bombay": "Bombay",
+    "british-shorthair": "Br. korthaar",
+    "egyptian-mau": "Egyptische mau",
+    "maine-coon": "Maine Coon",
+    "persian": "Perzisch",
+    "ragdoll": "Ragdoll",
+    "russian-blue": "Russisch blauw",
+    "siamese": "Siamees",
+    "sphynx": "Sphynx"
+  },
+  "achievements": {
+    "first-catch": "Eerste vangst",
+    "breed-hunter": "Rassenjager",
+    "explorer": "Ontdekker",
+    "night-owl": "Nachtuil",
+    "streak-7": "7-daagse reeks",
+    "local-legend": "Buurtlegende"
+  }
+}

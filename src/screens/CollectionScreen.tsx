@@ -3,6 +3,8 @@ import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
+import { tKey } from '../i18n';
 import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUserCats } from '../hooks/useUserCats';
@@ -18,6 +20,7 @@ type Tab = 'breeds' | 'cats';
 const TABS: Tab[] = ['breeds', 'cats'];
 
 export function CollectionScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const uid = useAuthStore((s) => s.uid);
@@ -66,10 +69,10 @@ export function CollectionScreen({ navigation }: Props) {
   return (
     <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>My CatDex</Text>
+        <Text style={styles.title}>{t('collection.title')}</Text>
         <View style={styles.progressRow}>
           <Text style={styles.progressLabel}>
-            {unlockedCount} of {BREEDS.length} breeds discovered
+            {t('collection.progress', { unlocked: unlockedCount, total: BREEDS.length })}
           </Text>
           <Text style={styles.progressPercent}>{percent}%</Text>
         </View>
@@ -82,7 +85,7 @@ export function CollectionScreen({ navigation }: Props) {
           onPress={() => goToTab('breeds')}
         >
           <Text style={[styles.tabLabel, tab === 'breeds' ? styles.tabLabelActive : styles.tabLabelInactive]}>
-            Breeds
+            {t('collection.breedsTab')}
           </Text>
         </Pressable>
         <Pressable
@@ -90,7 +93,7 @@ export function CollectionScreen({ navigation }: Props) {
           onPress={() => goToTab('cats')}
         >
           <Text style={[styles.tabLabel, tab === 'cats' ? styles.tabLabelActive : styles.tabLabelInactive]}>
-            My Cats
+            {t('collection.catsTab')}
           </Text>
         </Pressable>
       </View>
@@ -118,7 +121,7 @@ export function CollectionScreen({ navigation }: Props) {
                       style={[styles.tileLabel, item.unlocked ? styles.tileLabelUnlocked : null]}
                       numberOfLines={1}
                     >
-                      {item.breed.name}
+                      {tKey(t, `breeds.${item.breed.id}`)}
                     </Text>
                   </View>
                 )}
@@ -142,7 +145,7 @@ export function CollectionScreen({ navigation }: Props) {
                     </Text>
                   </Pressable>
                 )}
-                ListEmptyComponent={<Text style={styles.emptyText}>No cats caught yet — go find one!</Text>}
+                ListEmptyComponent={<Text style={styles.emptyText}>{t('collection.empty')}</Text>}
               />
             </View>
           </Animated.View>

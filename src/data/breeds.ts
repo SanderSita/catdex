@@ -1,21 +1,23 @@
+import type { TFunction } from 'i18next';
+import { tKey } from '../i18n';
 import type { Breed } from '../types/models';
 
 // modelLabels map to the Roboflow "cat-breeds-2n7zk/2" class list, which is:
 // Abyssinian, Bengal, Birman, Bombay, British_Shorthair, Egyptian_Mau,
 // Maine_Coon, Persian, Ragdoll, Russian_Blue, Siamese, Sphynx.
 export const BREEDS: Breed[] = [
-  { id: 'abyssinian', name: 'Abyssinian', modelLabels: ['Abyssinian'] },
-  { id: 'bengal', name: 'Bengal', modelLabels: ['Bengal'] },
-  { id: 'birman', name: 'Birman', modelLabels: ['Birman'] },
-  { id: 'bombay', name: 'Bombay', modelLabels: ['Bombay'] },
-  { id: 'british-shorthair', name: 'Brit. Shorthair', modelLabels: ['British Shorthair', 'British_Shorthair'] },
-  { id: 'egyptian-mau', name: 'Egyptian Mau', modelLabels: ['Egyptian Mau', 'Egyptian_Mau'] },
-  { id: 'maine-coon', name: 'Maine Coon', modelLabels: ['Maine Coon', 'Maine_Coon'] },
-  { id: 'persian', name: 'Persian', modelLabels: ['Persian'] },
-  { id: 'ragdoll', name: 'Ragdoll', modelLabels: ['Ragdoll'] },
-  { id: 'russian-blue', name: 'Russian Blue', modelLabels: ['Russian Blue', 'Russian_Blue'] },
-  { id: 'siamese', name: 'Siamese', modelLabels: ['Siamese'] },
-  { id: 'sphynx', name: 'Sphynx', modelLabels: ['Sphynx'] },
+  { id: 'abyssinian', modelLabels: ['Abyssinian'] },
+  { id: 'bengal', modelLabels: ['Bengal'] },
+  { id: 'birman', modelLabels: ['Birman'] },
+  { id: 'bombay', modelLabels: ['Bombay'] },
+  { id: 'british-shorthair', modelLabels: ['British Shorthair', 'British_Shorthair'] },
+  { id: 'egyptian-mau', modelLabels: ['Egyptian Mau', 'Egyptian_Mau'] },
+  { id: 'maine-coon', modelLabels: ['Maine Coon', 'Maine_Coon'] },
+  { id: 'persian', modelLabels: ['Persian'] },
+  { id: 'ragdoll', modelLabels: ['Ragdoll'] },
+  { id: 'russian-blue', modelLabels: ['Russian Blue', 'Russian_Blue'] },
+  { id: 'siamese', modelLabels: ['Siamese'] },
+  { id: 'sphynx', modelLabels: ['Sphynx'] },
 ];
 
 export function breedIdFromModelLabel(label: string): string | null {
@@ -25,7 +27,8 @@ export function breedIdFromModelLabel(label: string): string | null {
   return found ? found.id : null;
 }
 
-export function breedNameById(id: string | null): string {
-  if (!id) return 'Unknown';
-  return BREEDS.find((b) => b.id === id)?.name ?? 'Unknown';
+/** Translated display name for a breed id. Pass `t` from `useTranslation()` (or the raw `i18n.t`). */
+export function breedNameById(id: string | null, t: TFunction): string {
+  if (!id || !BREEDS.some((b) => b.id === id)) return t('common.unknown');
+  return tKey(t, `breeds.${id}`);
 }

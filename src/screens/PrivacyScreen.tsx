@@ -1,16 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { colors, fonts } from '../theme';
 
 export function PrivacyScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.container, { paddingTop: insets.top + 24 }]}>
-      <Text style={styles.title}>Privacy</Text>
-      <Text style={styles.body}>
-        Your sightings and photos are private to your account. Location data is only used to place your
-        cats on your own map and is never shared with other users.
-      </Text>
+      <Text style={styles.title}>{t('privacy.title')}</Text>
+      <Text style={styles.body}>{t('privacy.body')}</Text>
     </View>
   );
 }

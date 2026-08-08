@@ -1,0 +1,107 @@
+{
+  "common": {
+    "unknown": "Unknown"
+  },
+  "tabs": {
+    "map": "Map",
+    "collection": "CatDex",
+    "profile": "Profile"
+  },
+  "map": {
+    "title": "CatDex",
+    "radiusLabel": "{{km}} km radius",
+    "radiusOption": "{{km}} km",
+    "locating": "Finding your location…",
+    "newSighting": "New Sighting",
+    "catsNearby_one": "{{count}} cat nearby",
+    "catsNearby_other": "{{count}} cats nearby"
+  },
+  "collection": {
+    "title": "My CatDex",
+    "progress": "{{unlocked}} of {{total}} breeds discovered",
+    "breedsTab": "Breeds",
+    "catsTab": "My Cats",
+    "empty": "No cats caught yet — go find one!"
+  },
+  "camera": {
+    "permission": "CatDex needs camera access to photograph cats.",
+    "grantAccess": "Grant access",
+    "frameHint": "Frame the cat"
+  },
+  "newSighting": {
+    "locating": "Locating…",
+    "unknownLocation": "Unknown location",
+    "identifyError": "Could not identify this cat.",
+    "saveError": "Could not save this sighting.",
+    "title": "New Sighting!",
+    "suggestedBreed": "Suggested breed",
+    "identifying": "Identifying…",
+    "matchPercent": "{{confidence}}% match",
+    "notRight": "Not right? Search breeds",
+    "nameLabel": "Give this cat a name",
+    "namePlaceholder": "e.g. Marmalade",
+    "existingCat": "Seen this cat before? Add to an existing entry",
+    "addSighting": "Add sighting",
+    "addToCatDex": "Add to CatDex"
+  },
+  "catDetail": {
+    "sightings": "Sightings",
+    "firstSeen": "First seen",
+    "lastSeen": "Last seen",
+    "history": "Sighting history"
+  },
+  "breedSearch": {
+    "title": "Search breeds",
+    "placeholder": "Search…"
+  },
+  "profile": {
+    "catchingSince": "Catching since {{date}}",
+    "catsFound": "Cats found",
+    "breeds": "Breeds",
+    "dayStreak": "Day streak",
+    "achievements": "Achievements",
+    "settingsHeader": "Settings",
+    "searchRadius": "Default search radius",
+    "notifications": "Notifications",
+    "on": "On",
+    "off": "Off",
+    "logOut": "Log out"
+  },
+  "privacy": {
+    "title": "Privacy",
+    "body": "Your sightings and photos are private to your account. Location data is only used to place your cats on your own map and is never shared with other users."
+  },
+  "achievementUnlock": {
+    "title": "Achievement Unlocked!",
+    "progress": "{{current}} of {{total}}",
+    "nice": "Nice!",
+    "next": "Next"
+  },
+  "errors": {
+    "connectionFailed": "Could not connect: {{error}}",
+    "signInFailed": "Anonymous sign-in failed.",
+    "classifierNoData": "Classifier returned no data."
+  },
+  "breeds": {
+    "abyssinian": "Abyssinian",
+    "bengal": "Bengal",
+    "birman": "Birman",
+    "bombay": "Bombay",
+    "british-shorthair": "Brit. Shorthair",
+    "egyptian-mau": "Egyptian Mau",
+    "maine-coon": "Maine Coon",
+    "persian": "Persian",
+    "ragdoll": "Ragdoll",
+    "russian-blue": "Russian Blue",
+    "siamese": "Siamese",
+    "sphynx": "Sphynx"
+  },
+  "achievements": {
+    "first-catch": "First Catch",
+    "breed-hunter": "Breed Hunter",
+    "explorer": "Explorer",
+    "night-owl": "Night Owl",
+    "streak-7": "7-Day Streak",
+    "local-legend": "Local Legend"
+  }
+}

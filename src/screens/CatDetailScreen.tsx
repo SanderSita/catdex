@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ChevronLeft } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
@@ -13,11 +14,15 @@ import { colors, fonts } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CatDetail'>;
 
-function formatDate(ms: number): string {
-  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+function formatDate(ms: number, language: string): string {
+  return new Date(ms).toLocaleDateString(language === 'nl' ? 'nl-NL' : 'en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 export function CatDetailScreen({ route, navigation }: Props) {
+  const { t, i18n } = useTranslation();
   const { catId } = route.params;
   const insets = useSafeAreaInsets();
   const uid = useAuthStore((s) => s.uid);
@@ -72,14 +77,14 @@ export function CatDetailScreen({ route, navigation }: Props) {
             </View>
 
             <View style={styles.statsRow}>
-              <StatTile value={cat.sightingCount} label="Sightings" />
-              <StatTile value={formatDate(cat.firstSeenAt)} label="First seen" />
-              <StatTile value={formatDate(cat.lastSeenAt)} label="Last seen" />
+              <StatTile value={cat.sightingCount} label={t('catDetail.sightings')} />
+              <StatTile value={formatDate(cat.firstSeenAt, i18n.language)} label={t('catDetail.firstSeen')} />
+              <StatTile value={formatDate(cat.lastSeenAt, i18n.language)} label={t('catDetail.lastSeen')} />
             </View>
           </View>
 
           <View style={styles.historySection}>
-            <Text style={styles.historyTitle}>Sighting history</Text>
+            <Text style={styles.historyTitle}>{t('catDetail.history')}</Text>
           </View>
         </View>
       }
@@ -91,7 +96,7 @@ export function CatDetailScreen({ route, navigation }: Props) {
           <View style={styles.historyDot} />
           <View style={{ flex: 1 }}>
             <Text style={styles.historyLocation}>{item.locationLabel}</Text>
-            <Text style={styles.historyDate}>{formatDate(item.capturedAt)}</Text>
+            <Text style={styles.historyDate}>{formatDate(item.capturedAt, i18n.language)}</Text>
           </View>
         </View>
       )}

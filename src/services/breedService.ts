@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { BREEDS, breedIdFromModelLabel, breedNameById } from '../data/breeds';
+import i18n, { tKey } from '../i18n';
 import type { Breed } from '../types/models';
 
 interface ClassifyBreedResponse {
@@ -23,11 +24,11 @@ export async function classifyBreed(photoUrl: string): Promise<BreedGuess> {
     body: { photoUrl },
   });
   if (error) throw error;
-  if (!data) throw new Error('Classifier returned no data.');
+  if (!data) throw new Error(i18n.t('errors.classifierNoData'));
   const breedId = data.label ? breedIdFromModelLabel(data.label) : null;
   return {
     breedId,
-    breedName: breedId ? breedNameById(breedId) : data.label ?? 'Unknown',
+    breedName: breedId ? breedNameById(breedId, i18n.t) : data.label ?? i18n.t('common.unknown'),
     confidencePercent: Math.round(data.confidence * 100),
   };
 }
@@ -35,5 +36,5 @@ export async function classifyBreed(photoUrl: string): Promise<BreedGuess> {
 export function searchBreeds(query: string): Breed[] {
   const q = query.trim().toLowerCase();
   if (!q) return BREEDS;
-  return BREEDS.filter((b) => b.name.toLowerCase().includes(q));
+  return BREEDS.filter((b) => tKey(i18n.t, `breeds.${b.id}`).toLowerCase().includes(q));
 }

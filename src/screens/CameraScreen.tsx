@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions, type CameraType, type FlashMode } from 'expo-camera';
 import { X, Zap, ZapOff, SwitchCamera } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { useLocation } from '../hooks/useLocation';
@@ -11,6 +12,7 @@ import { colors, fonts } from '../theme';
 type Props = NativeStackScreenProps<RootStackParamList, 'Camera'>;
 
 export function CameraScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [permission, requestPermission] = useCameraPermissions();
   const { coords } = useLocation();
@@ -23,9 +25,9 @@ export function CameraScreen({ navigation }: Props) {
   if (!permission.granted) {
     return (
       <View style={[styles.container, styles.permissionWrap]}>
-        <Text style={styles.permissionText}>CatDex needs camera access to photograph cats.</Text>
+        <Text style={styles.permissionText}>{t('camera.permission')}</Text>
         <Pressable style={styles.permissionButton} onPress={requestPermission}>
-          <Text style={styles.permissionButtonLabel}>Grant access</Text>
+          <Text style={styles.permissionButtonLabel}>{t('camera.grantAccess')}</Text>
         </Pressable>
       </View>
     );
@@ -59,7 +61,7 @@ export function CameraScreen({ navigation }: Props) {
 
       <View style={styles.viewfinderFrame} pointerEvents="none">
         <View style={styles.hintPill}>
-          <Text style={styles.hintText}>Frame the cat</Text>
+          <Text style={styles.hintText}>{t('camera.frameHint')}</Text>
         </View>
         <View style={[styles.corner, styles.cornerTL]} />
         <View style={[styles.corner, styles.cornerTR]} />

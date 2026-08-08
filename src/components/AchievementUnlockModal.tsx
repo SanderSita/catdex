@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
+import { tKey } from '../i18n';
 import type { Achievement } from '../types/models';
 import { PrimaryButton } from './PrimaryButton';
 import { colors, fonts } from '../theme';
@@ -12,6 +14,7 @@ interface Props {
 }
 
 export function AchievementUnlockModal({ queue, onDone }: Props) {
+  const { t } = useTranslation();
   const [index, setIndex] = useState(0);
   const scale = useSharedValue(0.6);
   const opacity = useSharedValue(0);
@@ -46,15 +49,19 @@ export function AchievementUnlockModal({ queue, onDone }: Props) {
     <Modal visible transparent animationType="fade" statusBarTranslucent onRequestClose={onNext}>
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          <Text style={styles.eyebrow}>Achievement Unlocked!</Text>
+          <Text style={styles.eyebrow}>{t('achievementUnlock.title')}</Text>
           <Animated.View style={[styles.badge, { backgroundColor: current.color }, badgeStyle]} />
-          <Text style={styles.label}>{current.label}</Text>
+          <Text style={styles.label}>{tKey(t, `achievements.${current.id}`)}</Text>
           {queue.length > 1 ? (
             <Text style={styles.progress}>
-              {index + 1} of {queue.length}
+              {t('achievementUnlock.progress', { current: index + 1, total: queue.length })}
             </Text>
           ) : null}
-          <PrimaryButton label={isLast ? 'Nice!' : 'Next'} onPress={onNext} style={styles.button} />
+          <PrimaryButton
+            label={isLast ? t('achievementUnlock.nice') : t('achievementUnlock.next')}
+            onPress={onNext}
+            style={styles.button}
+          />
         </View>
       </View>
     </Modal>

@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
+import { tKey } from '../i18n';
 import type { Achievement, UserStats } from '../types/models';
 import { colors, fonts } from '../theme';
 
@@ -17,6 +19,7 @@ interface Props {
 }
 
 export function AchievementBadge({ achievement, unlocked, stats }: Props) {
+  const { t } = useTranslation();
   const progress = unlocked ? 1 : achievement.progress ? Math.max(0, Math.min(1, achievement.progress(stats))) : 0;
   const showRing = !unlocked && Boolean(achievement.progress);
 
@@ -56,7 +59,7 @@ export function AchievementBadge({ achievement, unlocked, stats }: Props) {
           ]}
         />
       </View>
-      <Text style={styles.label}>{achievement.label}</Text>
+      <Text style={styles.label}>{tKey(t, `achievements.${achievement.id}`)}</Text>
     </View>
   );
 }

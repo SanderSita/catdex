@@ -1,3 +1,4 @@
+import './src/i18n';
 import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -5,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
+import { useTranslation } from 'react-i18next';
 import {
   Comfortaa_600SemiBold,
   Comfortaa_700Bold,
@@ -18,9 +20,12 @@ import {
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/store/useAuthStore';
 import { useAchievementsStore } from './src/store/useAchievementsStore';
+import { useAppLocaleSync } from './src/hooks/useAppLocaleSync';
 import { colors } from './src/theme';
 
 export default function App() {
+  const { t } = useTranslation();
+  useAppLocaleSync();
   const [fontsLoaded] = useFonts({
     Comfortaa_600SemiBold,
     Comfortaa_700Bold,
@@ -47,7 +52,7 @@ export default function App() {
   if (authError) {
     return (
       <View style={styles.loading}>
-        <Text style={styles.errorText}>Could not connect: {authError}</Text>
+        <Text style={styles.errorText}>{t('errors.connectionFailed', { error: authError })}</Text>
       </View>
     );
   }

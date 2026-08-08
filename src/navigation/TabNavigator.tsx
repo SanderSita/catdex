@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet } from 'react-native';
 import { MapPin, LayoutGrid, User } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
 import type { TabParamList } from './types';
 import { MapScreen } from '../screens/MapScreen';
 import { CollectionScreen } from '../screens/CollectionScreen';
@@ -16,6 +17,7 @@ const ICONS: Record<keyof TabParamList, typeof MapPin> = {
 };
 
 export function TabNavigator() {
+  const { t } = useTranslation();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -30,9 +32,9 @@ export function TabNavigator() {
         },
       })}
     >
-      <Tab.Screen name="Map" component={MapScreen} />
-      <Tab.Screen name="Collection" component={CollectionScreen} options={{ title: 'CatDex' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Map" component={MapScreen} options={{ title: t('tabs.map') }} />
+      <Tab.Screen name="Collection" component={CollectionScreen} options={{ title: t('tabs.collection') }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: t('tabs.profile') }} />
     </Tab.Navigator>
   );
 }

@@ -13,6 +13,7 @@ import * as Location from 'expo-location';
 import { X } from 'lucide-react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
@@ -32,11 +33,12 @@ import { colors, fonts } from '../theme';
 type Props = NativeStackScreenProps<RootStackParamList, 'NewSighting'>;
 
 export function NewSightingScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { photoUri, lat, lng } = route.params;
   const insets = useSafeAreaInsets();
   const uid = useAuthStore((s) => s.uid);
 
-  const [locationLabel, setLocationLabel] = useState('Locating…');
+  const [locationLabel, setLocationLabel] = useState(t('newSighting.locating'));
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [guess, setGuess] = useState<BreedGuess | null>(null);
   const [breedOverrideId, setBreedOverrideId] = useState<string | null>(null);
@@ -53,12 +55,12 @@ export function NewSightingScreen({ route, navigation }: Props) {
     Location.reverseGeocodeAsync({ latitude: lat, longitude: lng })
       .then(([place]) => {
         if (place) {
-          setLocationLabel([place.street, place.city].filter(Boolean).join(', ') || 'Unknown location');
+          setLocationLabel([place.street, place.city].filter(Boolean).join(', ') || t('newSighting.unknownLocation'));
         } else {
-          setLocationLabel('Unknown location');
+          setLocationLabel(t('newSighting.unknownLocation'));
         }
       })
-      .catch(() => setLocationLabel('Unknown location'));
+      .catch(() => setLocationLabel(t('newSighting.unknownLocation')));
   }, [lat, lng]);
 
   useEffect(() => {
@@ -78,7 +80,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
         if (cancelled) return;
         setGuess(result);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Could not identify this cat.');
+        if (!cancelled) setError(err instanceof Error ? err.message : t('newSighting.identifyError'));
       } finally {
         if (!cancelled) setClassifying(false);
       }
@@ -96,7 +98,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
   );
 
   const activeBreedId = breedOverrideId ?? guess?.breedId ?? null;
-  const activeBreedName = breedOverrideId ? breedNameById(breedOverrideId) : guess?.breedName ?? null;
+  const activeBreedName = breedOverrideId ? breedNameById(breedOverrideId, t) : guess?.breedName ?? null;
 
   const canSave = Boolean(uploadedUrl && name.trim() && !saving);
 
@@ -112,7 +114,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
         lng,
         locationLabel,
         breedId: activeBreedId,
-        breedName: activeBreedName ?? 'Unknown',
+        breedName: activeBreedName ?? t('common.unknown'),
         breedConfidence: breedOverrideId ? null : guess?.confidencePercent ?? null,
         name: name.trim(),
         existingCatId: existingCatId ?? undefined,
@@ -133,7 +135,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
         navigation.replace('CatDetail', { catId });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save this sighting.');
+      setError(err instanceof Error ? err.message : t('newSighting.saveError'));
       setSaving(false);
     }
   };
@@ -150,7 +152,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
           <X size={18} color={colors.textMid} />
         </Pressable>
         <View style={styles.newSightingBadge}>
-          <Text style={styles.newSightingText}>New Sighting!</Text>
+          <Text style={styles.newSightingText}>{t('newSighting.title')}</Text>
         </View>
         <View style={styles.closeButton} />
       </View>
@@ -162,28 +164,28 @@ export function NewSightingScreen({ route, navigation }: Props) {
       <View style={styles.section}>
         <View style={styles.breedCard}>
           <View>
-            <Text style={styles.breedLabel}>Suggested breed</Text>
+            <Text style={styles.breedLabel}>{t('newSighting.suggestedBreed')}</Text>
             <Text style={styles.breedName}>
-              {classifying ? 'Identifying…' : activeBreedName ?? 'Unknown'}
+              {classifying ? t('newSighting.identifying') : activeBreedName ?? t('common.unknown')}
             </Text>
           </View>
           {classifying ? (
             <ActivityIndicator color={colors.tealPercent} />
           ) : !breedOverrideId && guess ? (
-            <Text style={styles.matchPercent}>{guess.confidencePercent}% match</Text>
+            <Text style={styles.matchPercent}>{t('newSighting.matchPercent', { confidence: guess.confidencePercent })}</Text>
           ) : null}
         </View>
         <Pressable style={styles.searchLink} onPress={() => navigation.navigate('BreedSearch')}>
-          <Text style={styles.searchLinkText}>Not right? Search breeds</Text>
+          <Text style={styles.searchLinkText}>{t('newSighting.notRight')}</Text>
         </Pressable>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.fieldLabel}>Give this cat a name</Text>
+        <Text style={styles.fieldLabel}>{t('newSighting.nameLabel')}</Text>
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="e.g. Marmalade"
+          placeholder={t('newSighting.namePlaceholder')}
           placeholderTextColor={colors.textLight}
           style={styles.nameInput}
         />
@@ -198,7 +200,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
 
       {userCats.length > 0 ? (
         <View style={styles.section}>
-          <Text style={styles.fieldLabel}>Seen this cat before? Add to an existing entry</Text>
+          <Text style={styles.fieldLabel}>{t('newSighting.existingCat')}</Text>
           <FlatList
             horizontal
             data={userCats}
@@ -226,7 +228,11 @@ export function NewSightingScreen({ route, navigation }: Props) {
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       <View style={styles.section}>
-        <PrimaryButton label={existingCatId ? 'Add sighting' : 'Add to CatDex'} onPress={onSave} disabled={!canSave} />
+        <PrimaryButton
+          label={existingCatId ? t('newSighting.addSighting') : t('newSighting.addToCatDex')}
+          onPress={onSave}
+          disabled={!canSave}
+        />
       </View>
 
       {unlockedQueue.length > 0 ? (

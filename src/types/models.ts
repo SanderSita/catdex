@@ -1,13 +1,11 @@
 export interface Breed {
   id: string;
-  name: string;
   /** Label(s) the Roboflow model returns that map to this breed. */
   modelLabels: string[];
 }
 
 export interface Achievement {
   id: string;
-  label: string;
   color: string;
   /** 0-1 fraction toward unlocking, for badges with a meaningful threshold. Omit for boolean-only badges. */
   progress?: (stats: UserStats) => number;
