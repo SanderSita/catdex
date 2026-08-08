@@ -1,21 +1,21 @@
 import type { Breed } from '../types/models';
 
-// modelLabels are best-guess mappings to the Roboflow "cat-breeds-2n7zk/2"
-// class names — verify against the model's actual class list (Roboflow
-// project page > Versions > 2 > Classes) and adjust before shipping.
+// modelLabels map to the Roboflow "cat-breeds-2n7zk/2" class list, which is:
+// Abyssinian, Bengal, Birman, Bombay, British_Shorthair, Egyptian_Mau,
+// Maine_Coon, Persian, Ragdoll, Russian_Blue, Siamese, Sphynx.
 export const BREEDS: Breed[] = [
-  { id: 'tabby', name: 'Tabby', modelLabels: ['Tabby', 'tabby'] },
-  { id: 'siamese', name: 'Siamese', modelLabels: ['Siamese', 'siamese'] },
-  { id: 'calico', name: 'Calico', modelLabels: ['Calico', 'calico'] },
-  { id: 'tuxedo', name: 'Tuxedo', modelLabels: ['Tuxedo', 'tuxedo'] },
+  { id: 'abyssinian', name: 'Abyssinian', modelLabels: ['Abyssinian'] },
+  { id: 'bengal', name: 'Bengal', modelLabels: ['Bengal'] },
+  { id: 'birman', name: 'Birman', modelLabels: ['Birman'] },
+  { id: 'bombay', name: 'Bombay', modelLabels: ['Bombay'] },
+  { id: 'british-shorthair', name: 'Brit. Shorthair', modelLabels: ['British Shorthair', 'British_Shorthair'] },
+  { id: 'egyptian-mau', name: 'Egyptian Mau', modelLabels: ['Egyptian Mau', 'Egyptian_Mau'] },
   { id: 'maine-coon', name: 'Maine Coon', modelLabels: ['Maine Coon', 'Maine_Coon'] },
-  { id: 'persian', name: 'Persian', modelLabels: ['Persian', 'persian'] },
-  { id: 'british-shorthair', name: 'Brit. Shorthair', modelLabels: ['British Shorthair'] },
-  { id: 'ragdoll', name: 'Ragdoll', modelLabels: ['Ragdoll', 'ragdoll'] },
-  { id: 'sphynx', name: 'Sphynx', modelLabels: ['Sphynx', 'sphynx'] },
-  { id: 'bengal', name: 'Bengal', modelLabels: ['Bengal', 'bengal'] },
-  { id: 'russian-blue', name: 'Russian Blue', modelLabels: ['Russian Blue'] },
-  { id: 'scottish-fold', name: 'Scottish Fold', modelLabels: ['Scottish Fold'] },
+  { id: 'persian', name: 'Persian', modelLabels: ['Persian'] },
+  { id: 'ragdoll', name: 'Ragdoll', modelLabels: ['Ragdoll'] },
+  { id: 'russian-blue', name: 'Russian Blue', modelLabels: ['Russian Blue', 'Russian_Blue'] },
+  { id: 'siamese', name: 'Siamese', modelLabels: ['Siamese'] },
+  { id: 'sphynx', name: 'Sphynx', modelLabels: ['Sphynx'] },
 ];
 
 export function breedIdFromModelLabel(label: string): string | null {

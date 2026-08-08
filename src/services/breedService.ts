@@ -3,7 +3,7 @@ import { BREEDS, breedIdFromModelLabel, breedNameById } from '../data/breeds';
 import type { Breed } from '../types/models';
 
 interface ClassifyBreedResponse {
-  label: string;
+  label: string | null;
   confidence: number;
 }
 
@@ -24,10 +24,10 @@ export async function classifyBreed(photoUrl: string): Promise<BreedGuess> {
   });
   if (error) throw error;
   if (!data) throw new Error('Classifier returned no data.');
-  const breedId = breedIdFromModelLabel(data.label);
+  const breedId = data.label ? breedIdFromModelLabel(data.label) : null;
   return {
     breedId,
-    breedName: breedId ? breedNameById(breedId) : data.label,
+    breedName: breedId ? breedNameById(breedId) : data.label ?? 'Unknown',
     confidencePercent: Math.round(data.confidence * 100),
   };
 }
