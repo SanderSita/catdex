@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   wrap: {
     overflow: 'hidden',
     width: '100%',
-    height: '100%',
+    aspectRatio: 1,
     backgroundColor: colors.creamMuted2,
   },
   placeholder: {
