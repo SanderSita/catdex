@@ -7,6 +7,8 @@ import { NewSightingScreen } from '../screens/NewSightingScreen';
 import { BreedSearchScreen } from '../screens/BreedSearchScreen';
 import { CatDetailScreen } from '../screens/CatDetailScreen';
 import { PrivacyScreen } from '../screens/PrivacyScreen';
+import { AddFriendScreen } from '../screens/AddFriendScreen';
+import { FriendDetailScreen } from '../screens/FriendDetailScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -20,6 +22,8 @@ export function RootNavigator() {
       <Stack.Screen name="BreedSearch" component={BreedSearchScreen} options={{ presentation: 'modal' }} />
       <Stack.Screen name="CatDetail" component={CatDetailScreen} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} options={{ headerShown: true, title: t('privacy.title') }} />
+      <Stack.Screen name="AddFriend" component={AddFriendScreen} options={{ presentation: 'modal' }} />
+      <Stack.Screen name="FriendDetail" component={FriendDetailScreen} />
     </Stack.Navigator>
   );
 }

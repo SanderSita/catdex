@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 export type TabParamList = {
   Map: undefined;
   Collection: undefined;
+  Friends: undefined;
   Profile: undefined;
 };
 
@@ -15,6 +16,8 @@ export type RootStackParamList = {
   BreedSearch: undefined;
   CatDetail: { catId: string };
   Privacy: undefined;
+  AddFriend: { prefillCode?: string } | undefined;
+  FriendDetail: { friendUid: string; friendName?: string };
 };
 
 export type TabScreenProps<T extends keyof TabParamList> = CompositeScreenProps<

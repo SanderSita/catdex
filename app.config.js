@@ -34,6 +34,7 @@ module.exports = ({ config }) => ({
           apiKey: process.env.GOOGLE_MAPS_API_KEY_ANDROID,
         },
       },
+      googleServicesFile: './google-services.json',
     },
     web: {
       favicon: './assets/favicon.png',
@@ -54,6 +55,13 @@ module.exports = ({ config }) => ({
             'CatDex shows nearby cat sightings on the map and tags new sightings with your location.',
         },
       ],
+      'expo-notifications',
     ],
+    extra: {
+      eas: {
+        // @sander105/catdex, linked via `eas init`.
+        projectId: process.env.EAS_PROJECT_ID ?? 'b98d3fbd-94f8-44f8-86fb-fc01a354eb79',
+      },
+    },
   },
 });

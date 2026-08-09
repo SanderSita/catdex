@@ -2,3 +2,8 @@ project_id = "catdex"
 
 [functions.classify-breed]
 verify_jwt = true
+
+# Called by a Supabase Database Webhook, not a user session — authenticated
+# via a shared secret header instead (see notify-friends/index.ts).
+[functions.notify-friends]
+verify_jwt = false

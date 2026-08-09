@@ -7,6 +7,8 @@ export interface UserProfile {
   joinedAt: number;
   defaultRadiusKm: number;
   notificationsEnabled: boolean;
+  friendCode: string | null;
+  friendNotificationsEnabled: boolean;
   stats: UserStats;
 }
 
@@ -16,6 +18,8 @@ interface ProfileRow {
   joined_at: string;
   default_radius_km: number;
   notifications_enabled: boolean;
+  friend_code: string | null;
+  friend_notifications_enabled: boolean;
   cats_found: number;
   breeds_unlocked: number;
   day_streak: number;
@@ -28,6 +32,8 @@ function mapProfileRow(row: ProfileRow): UserProfile {
     joinedAt: new Date(row.joined_at).getTime(),
     defaultRadiusKm: row.default_radius_km,
     notificationsEnabled: row.notifications_enabled,
+    friendCode: row.friend_code,
+    friendNotificationsEnabled: row.friend_notifications_enabled,
     stats: {
       catsFound: row.cats_found,
       breedsUnlocked: row.breeds_unlocked,
@@ -59,12 +65,18 @@ export function subscribeToUserProfile(uid: string, onChange: (profile: UserProf
   };
 }
 
-export async function updateUserSettings(uid: string, patch: Partial<Pick<UserProfile, 'defaultRadiusKm' | 'notificationsEnabled'>>): Promise<void> {
+export async function updateUserSettings(
+  uid: string,
+  patch: Partial<Pick<UserProfile, 'defaultRadiusKm' | 'notificationsEnabled' | 'friendNotificationsEnabled'>>
+): Promise<void> {
   const { error } = await supabase
     .from('profiles')
     .update({
       ...(patch.defaultRadiusKm !== undefined && { default_radius_km: patch.defaultRadiusKm }),
       ...(patch.notificationsEnabled !== undefined && { notifications_enabled: patch.notificationsEnabled }),
+      ...(patch.friendNotificationsEnabled !== undefined && {
+        friend_notifications_enabled: patch.friendNotificationsEnabled,
+      }),
     })
     .eq('id', uid);
   if (error) throw error;

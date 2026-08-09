@@ -5,6 +5,7 @@
   "tabs": {
     "map": "Map",
     "collection": "CatDex",
+    "friends": "Friends",
     "profile": "Profile"
   },
   "map": {
@@ -14,7 +15,8 @@
     "locating": "Finding your location…",
     "newSighting": "New Sighting",
     "catsNearby_one": "{{count}} cat nearby",
-    "catsNearby_other": "{{count}} cats nearby"
+    "catsNearby_other": "{{count}} cats nearby",
+    "friendsToggle": "Friends"
   },
   "collection": {
     "title": "My CatDex",
@@ -63,13 +65,49 @@
     "settingsHeader": "Settings",
     "searchRadius": "Default search radius",
     "notifications": "Notifications",
+    "friendNotifications": "Friend catch alerts",
     "on": "On",
     "off": "Off",
     "logOut": "Log out"
   },
   "privacy": {
     "title": "Privacy",
-    "body": "Your sightings and photos are private to your account. Location data is only used to place your cats on your own map and is never shared with other users."
+    "body": "Your sightings and photos are private to your account by default. If you add a friend and they accept, they can see your cats, sightings, and catch locations. Location data is never shared with anyone who isn't an accepted friend."
+  },
+  "friends": {
+    "title": "Friends",
+    "requestsSection": "Requests",
+    "friendsSection": "Friends",
+    "empty": "No friends yet — add one to see their cats.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "addFriend": "Add friend",
+    "pendingBadge": "Pending",
+    "catsCount_one": "{{count}} cat",
+    "catsCount_other": "{{count}} cats"
+  },
+  "addFriend": {
+    "title": "Add Friend",
+    "yourCode": "Your friend code",
+    "share": "Share my code",
+    "shareMessage": "Add me on CatDex! My friend code is {{code}} — catdex://friend/{{code}}",
+    "enterCode": "Enter a friend code",
+    "codePlaceholder": "ABCD123",
+    "send": "Find",
+    "sendRequest": "Send friend request",
+    "notFound": "No CatDex user has that code.",
+    "alreadyFriends": "You're already friends.",
+    "alreadyPending": "A request is already pending with this person.",
+    "ownCode": "That's your own code!",
+    "confirmTitle": "Add {{name}} as a friend?",
+    "requestSent": "Friend request sent!",
+    "autoAccepted": "You're now friends with {{name}}!"
+  },
+  "friendDetail": {
+    "empty": "No cats caught yet."
+  },
+  "toast": {
+    "friendCaught": "{{name}} just caught a {{breed}}!"
   },
   "achievementUnlock": {
     "title": "Achievement Unlocked!",

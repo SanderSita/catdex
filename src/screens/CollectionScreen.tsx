@@ -10,6 +10,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useUserCats } from '../hooks/useUserCats';
 import { BREEDS } from '../data/breeds';
 import { CatThumb } from '../components/CatThumb';
+import { CatsGrid } from '../components/CatsGrid';
 import { ProgressBar } from '../components/ProgressBar';
 import { colors, fonts } from '../theme';
 
@@ -128,24 +129,10 @@ export function CollectionScreen({ navigation }: Props) {
               />
             </View>
             <View style={{ width }}>
-              <FlatList
-                data={cats}
-                keyExtractor={(item) => item.id}
-                numColumns={3}
-                columnWrapperStyle={{ gap: 10 }}
-                contentContainerStyle={styles.grid}
-                renderItem={({ item }) => (
-                  <Pressable
-                    style={styles.gridCell}
-                    onPress={() => navigation.navigate('CatDetail', { catId: item.id })}
-                  >
-                    <CatThumb uri={item.primaryPhotoUrl} shape="rounded" />
-                    <Text style={styles.tileLabelUnlocked} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                  </Pressable>
-                )}
-                ListEmptyComponent={<Text style={styles.emptyText}>{t('collection.empty')}</Text>}
+              <CatsGrid
+                cats={cats}
+                onPressCat={(catId) => navigation.navigate('CatDetail', { catId })}
+                emptyLabel={t('collection.empty')}
               />
             </View>
           </Animated.View>
@@ -184,5 +171,4 @@ const styles = StyleSheet.create({
   lockedDot: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.creamMuted3 },
   tileLabel: { fontFamily: fonts.bodySemi, fontSize: 11, textAlign: 'center', color: colors.textLight },
   tileLabelUnlocked: { fontFamily: fonts.bodySemi, fontSize: 11, textAlign: 'center', color: colors.textDark },
-  emptyText: { fontFamily: fonts.body, color: colors.textMuted, textAlign: 'center', marginTop: 40 },
 });

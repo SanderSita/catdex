@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Camera, ChevronDown } from 'lucide-react-native';
+import { Camera, ChevronDown, Users } from 'lucide-react-native';
 import { Circle, Marker } from 'react-native-maps';
 import MapView from 'react-native-map-clustering';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,9 +8,12 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
+import { useFriendsStore } from '../store/useFriendsStore';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useLocation } from '../hooks/useLocation';
 import { useNearbyCats } from '../hooks/useNearbyCats';
+import { useFriendsNearbyCats } from '../hooks/useFriendsNearbyCats';
+import { otherUid } from '../services/friendsService';
 import { CatThumb } from '../components/CatThumb';
 import { colors, fonts } from '../theme';
 
@@ -27,7 +30,15 @@ export function MapScreen({ navigation }: Props) {
   const [radiusKm, setRadiusKm] = useState(3);
   const [radiusInitialized, setRadiusInitialized] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [showFriends, setShowFriends] = useState(false);
   const { nearby } = useNearbyCats(uid, coords, radiusKm);
+
+  const friendships = useFriendsStore((s) => s.friendships);
+  const acceptedFriendUids = useMemo(
+    () => (uid ? friendships.filter((f) => f.status === 'accepted').map((f) => otherUid(f, uid)) : []),
+    [friendships, uid]
+  );
+  const { nearby: friendsNearby } = useFriendsNearbyCats(showFriends ? acceptedFriendUids : [], coords, radiusKm);
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => [140, 320], []);
 
@@ -45,10 +56,21 @@ export function MapScreen({ navigation }: Props) {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <Text style={styles.title}>{t('map.title')}</Text>
-        <Pressable style={styles.radiusChip} onPress={() => setPickerOpen(true)}>
-          <Text style={styles.radiusText}>{t('map.radiusLabel', { km: radiusKm })}</Text>
-          <ChevronDown size={14} color={colors.tealTextSoft} />
-        </Pressable>
+        <View style={styles.headerChips}>
+          <Pressable
+            style={[styles.friendsChip, showFriends ? styles.friendsChipActive : null]}
+            onPress={() => setShowFriends((v) => !v)}
+          >
+            <Users size={14} color={showFriends ? colors.white : colors.tealTextSoft} />
+            <Text style={[styles.radiusText, showFriends ? styles.friendsChipTextActive : null]}>
+              {t('map.friendsToggle')}
+            </Text>
+          </Pressable>
+          <Pressable style={styles.radiusChip} onPress={() => setPickerOpen(true)}>
+            <Text style={styles.radiusText}>{t('map.radiusLabel', { km: radiusKm })}</Text>
+            <ChevronDown size={14} color={colors.tealTextSoft} />
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.mapWrap}>
@@ -82,6 +104,18 @@ export function MapScreen({ navigation }: Props) {
                 </View>
               </Marker>
             ))}
+            {showFriends &&
+              friendsNearby.map((cat) => (
+                <Marker
+                  key={cat.id}
+                  coordinate={{ latitude: cat.lat, longitude: cat.lng }}
+                  onPress={() => openCat(cat.id)}
+                >
+                  <View style={[styles.pin, styles.pinFriend]}>
+                    <CatThumb uri={cat.primaryPhotoUrl} shape="circle" />
+                  </View>
+                </Marker>
+              ))}
           </MapView>
         ) : (
           <View style={[StyleSheet.absoluteFill, styles.mapLoading]}>
@@ -152,6 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   title: { fontFamily: fonts.heading, fontSize: 22, color: colors.coral },
+  headerChips: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   radiusChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -162,6 +197,17 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   radiusText: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.tealTextSoft },
+  friendsChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.tealBgSoft,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+  },
+  friendsChipActive: { backgroundColor: colors.teal },
+  friendsChipTextActive: { color: colors.white },
   mapWrap: { flex: 1, backgroundColor: colors.mapBg },
   mapLoading: { alignItems: 'center', justifyContent: 'center' },
   loadingText: { fontFamily: fonts.body, color: colors.textMuted },
@@ -175,6 +221,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
+  },
+  pinFriend: {
+    borderWidth: 2.5,
+    borderColor: colors.teal,
   },
   fab: {
     position: 'absolute',

@@ -5,6 +5,7 @@
   "tabs": {
     "map": "Kaart",
     "collection": "CatDex",
+    "friends": "Vrienden",
     "profile": "Profiel"
   },
   "map": {
@@ -14,7 +15,8 @@
     "locating": "Locatie zoeken…",
     "newSighting": "Kat gevonden",
     "catsNearby_one": "{{count}} kat in de buurt",
-    "catsNearby_other": "{{count}} katten in de buurt"
+    "catsNearby_other": "{{count}} katten in de buurt",
+    "friendsToggle": "Vrienden"
   },
   "collection": {
     "title": "Mijn CatDex",
@@ -63,13 +65,49 @@
     "settingsHeader": "Instellingen",
     "searchRadius": "Standaard zoekstraal",
     "notifications": "Meldingen",
+    "friendNotifications": "Meldingen bij vangst door vrienden",
     "on": "Aan",
     "off": "Uit",
     "logOut": "Uitloggen"
   },
   "privacy": {
     "title": "Privacy",
-    "body": "Je waarnemingen en foto's zijn privé voor jouw account. Locatiegegevens worden alleen gebruikt om je katten op je eigen kaart te plaatsen en worden nooit gedeeld met andere gebruikers."
+    "body": "Je waarnemingen en foto's zijn standaard privé voor jouw account. Als je een vriend toevoegt en die accepteert, kan diegene je katten, waarnemingen en vangstlocaties zien. Locatiegegevens worden nooit gedeeld met iemand die geen geaccepteerde vriend is."
+  },
+  "friends": {
+    "title": "Vrienden",
+    "requestsSection": "Verzoeken",
+    "friendsSection": "Vrienden",
+    "empty": "Nog geen vrienden — voeg er een toe om hun katten te zien.",
+    "accept": "Accepteren",
+    "decline": "Afwijzen",
+    "addFriend": "Vriend toevoegen",
+    "pendingBadge": "In behandeling",
+    "catsCount_one": "{{count}} kat",
+    "catsCount_other": "{{count}} katten"
+  },
+  "addFriend": {
+    "title": "Vriend toevoegen",
+    "yourCode": "Jouw vriendencode",
+    "share": "Deel mijn code",
+    "shareMessage": "Voeg me toe op CatDex! Mijn vriendencode is {{code}} — catdex://friend/{{code}}",
+    "enterCode": "Voer een vriendencode in",
+    "codePlaceholder": "ABCD123",
+    "send": "Zoeken",
+    "sendRequest": "Vriendschapsverzoek sturen",
+    "notFound": "Geen CatDex-gebruiker met die code gevonden.",
+    "alreadyFriends": "Jullie zijn al vrienden.",
+    "alreadyPending": "Er staat al een verzoek open met deze persoon.",
+    "ownCode": "Dat is je eigen code!",
+    "confirmTitle": "{{name}} toevoegen als vriend?",
+    "requestSent": "Vriendschapsverzoek verstuurd!",
+    "autoAccepted": "Je bent nu vrienden met {{name}}!"
+  },
+  "friendDetail": {
+    "empty": "Nog geen katten gevangen."
+  },
+  "toast": {
+    "friendCaught": "{{name}} heeft net een {{breed}} gevangen!"
   },
   "achievementUnlock": {
     "title": "Prestatie ontgrendeld!",

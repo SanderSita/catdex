@@ -2,8 +2,9 @@ import { supabase, ensureSignedIn } from './supabase';
 import { encodeGeohash, geohashQueryBounds, filterWithinRadius } from './geo';
 import type { CatRecord, Sighting } from '../types/models';
 
-interface CatRow {
+export interface CatRow {
   id: string;
+  user_id: string;
   name: string;
   breed_id: string | null;
   breed_name: string;
@@ -29,9 +30,10 @@ interface SightingRow {
   breed_confidence: number | null;
 }
 
-function mapCatRow(row: CatRow): CatRecord {
+export function mapCatRow(row: CatRow): CatRecord {
   return {
     id: row.id,
+    userId: row.user_id,
     name: row.name,
     breedId: row.breed_id,
     breedName: row.breed_name,
@@ -165,22 +167,21 @@ export async function fetchNearbyCats(uid: string, lat: number, lng: number, rad
   return filterWithinRadius(Array.from(results.values()), lat, lng, radiusKm);
 }
 
-export async function fetchCat(uid: string, catId: string): Promise<CatRecord | null> {
-  const { data, error } = await supabase
-    .from('cats')
-    .select('*')
-    .eq('id', catId)
-    .eq('user_id', uid)
-    .maybeSingle();
+/**
+ * Not filtered by viewer uid — relies purely on RLS (owner or accepted
+ * friend), so this works whether the cat belongs to the caller or a friend.
+ */
+export async function fetchCat(catId: string): Promise<CatRecord | null> {
+  const { data, error } = await supabase.from('cats').select('*').eq('id', catId).maybeSingle();
   if (error) throw error;
   return data ? mapCatRow(data as CatRow) : null;
 }
 
-export async function fetchSightings(uid: string, catId: string): Promise<Sighting[]> {
+/** Not filtered by viewer uid — see fetchCat(). */
+export async function fetchSightings(catId: string): Promise<Sighting[]> {
   const { data, error } = await supabase
     .from('sightings')
     .select('*')
-    .eq('user_id', uid)
     .eq('cat_id', catId)
     .order('captured_at', { ascending: false });
   if (error) throw error;

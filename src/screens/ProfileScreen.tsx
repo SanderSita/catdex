@@ -49,6 +49,11 @@ export function ProfileScreen({ navigation }: Props) {
     updateUserSettings(uid, { notificationsEnabled: !profile.notificationsEnabled });
   };
 
+  const toggleFriendNotifications = () => {
+    if (!uid) return;
+    updateUserSettings(uid, { friendNotificationsEnabled: !profile.friendNotificationsEnabled });
+  };
+
   return (
     <FlatList
       style={styles.container}
@@ -87,6 +92,11 @@ export function ProfileScreen({ navigation }: Props) {
                 title={t('profile.notifications')}
                 detail={profile.notificationsEnabled ? t('profile.on') : t('profile.off')}
                 onPress={toggleNotifications}
+              />
+              <SettingsRow
+                title={t('profile.friendNotifications')}
+                detail={profile.friendNotificationsEnabled ? t('profile.on') : t('profile.off')}
+                onPress={toggleFriendNotifications}
               />
               <SettingsRow title={t('privacy.title')} onPress={() => navigation.navigate('Privacy')} />
               <SettingsRow title={t('profile.logOut')} chevron={false} isLast onPress={() => supabase.auth.signOut()} />

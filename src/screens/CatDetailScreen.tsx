@@ -35,8 +35,8 @@ export function CatDetailScreen({ route, navigation }: Props) {
     let cancelled = false;
     (async () => {
       const [catRecord, sightingList] = await Promise.all([
-        fetchCat(uid, catId),
-        fetchSightings(uid, catId),
+        fetchCat(catId),
+        fetchSightings(catId),
       ]);
       if (cancelled) return;
       setCat(catRecord);

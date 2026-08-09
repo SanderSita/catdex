@@ -19,6 +19,7 @@ export interface UserStats {
 
 export interface CatRecord {
   id: string;
+  userId: string;
   name: string;
   breedId: string | null;
   breedName: string;
