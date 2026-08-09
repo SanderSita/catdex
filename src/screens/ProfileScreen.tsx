@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pencil } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { supabase } from '../services/supabase';
-import { updateUserSettings } from '../services/userService';
+import { updateUserSettings, updateUsername } from '../services/userService';
 import { subscribeToUnlockedAchievements } from '../services/achievementsService';
 import { ACHIEVEMENTS } from '../data/achievements';
 import { CatThumb } from '../components/CatThumb';
 import { StatTile } from '../components/StatTile';
 import { AchievementBadge } from '../components/AchievementBadge';
 import { SettingsRow, SettingsSection } from '../components/SettingsRow';
+import { EditUsernameModal } from '../components/EditUsernameModal';
 import { colors, fonts } from '../theme';
 
 type Props = TabScreenProps<'Profile'>;
@@ -25,6 +27,7 @@ export function ProfileScreen({ navigation }: Props) {
   const uid = useAuthStore((s) => s.uid);
   const profile = useUserProfile(uid);
   const [unlocked, setUnlocked] = useState<Set<string>>(new Set());
+  const [editingUsername, setEditingUsername] = useState(false);
 
   useEffect(() => {
     if (!uid) return;
@@ -55,14 +58,20 @@ export function ProfileScreen({ navigation }: Props) {
   };
 
   return (
-    <FlatList
-      style={styles.container}
-      contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }}
-      ListHeaderComponent={
+    <>
+      <FlatList
+        style={styles.container}
+        contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }}
+        ListHeaderComponent={
         <View>
           <View style={styles.avatarSection}>
             <CatThumb uri={profile.avatarUrl} shape="circle" size={88} />
-            <Text style={styles.username}>{profile.displayName}</Text>
+            <View style={styles.usernameRow}>
+              <Text style={styles.username}>{profile.displayName}</Text>
+              <Pressable style={styles.editButton} onPress={() => setEditingUsername(true)} hitSlop={8}>
+                <Pencil size={14} color={colors.textMuted} />
+              </Pressable>
+            </View>
             <Text style={styles.joined}>{t('profile.catchingSince', { date: joinedLabel })}</Text>
           </View>
 
@@ -103,18 +112,34 @@ export function ProfileScreen({ navigation }: Props) {
             </SettingsSection>
           </View>
         </View>
-      }
-      data={[]}
-      renderItem={() => null}
-      keyExtractor={() => 'x'}
-    />
+        }
+        data={[]}
+        renderItem={() => null}
+        keyExtractor={() => 'x'}
+      />
+      <EditUsernameModal
+        visible={editingUsername}
+        currentName={profile.displayName}
+        onSave={(name) => (uid ? updateUsername(uid, name) : Promise.resolve('invalid'))}
+        onClose={() => setEditingUsername(false)}
+      />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   avatarSection: { alignItems: 'center', gap: 10, paddingHorizontal: 20 },
+  usernameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   username: { fontFamily: fonts.headingSemi, fontSize: 18, color: colors.textDark },
+  editButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.creamMuted,
+  },
   joined: { fontFamily: fonts.body, fontSize: 12, color: colors.textMuted },
   statsRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, paddingTop: 18 },
   achievementsSection: { paddingHorizontal: 20, paddingTop: 20 },

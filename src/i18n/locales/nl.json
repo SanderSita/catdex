@@ -74,6 +74,16 @@
     "title": "Privacy",
     "body": "Je waarnemingen en foto's zijn standaard privé voor jouw account. Als je een vriend toevoegt en die accepteert, kan diegene je katten, waarnemingen en vangstlocaties zien. Locatiegegevens worden nooit gedeeld met iemand die geen geaccepteerde vriend is."
   },
+  "editUsername": {
+    "title": "Gebruikersnaam bewerken",
+    "placeholder": "Gebruikersnaam",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "cancel": "Annuleren",
+    "invalid": "Gebruikersnaam moet 3-20 tekens zijn.",
+    "taken": "Die gebruikersnaam is al in gebruik.",
+    "error": "Kon gebruikersnaam niet bijwerken."
+  },
   "friends": {
     "title": "Vrienden",
     "requestsSection": "Verzoeken",

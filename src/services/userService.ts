@@ -65,6 +65,21 @@ export function subscribeToUserProfile(uid: string, onChange: (profile: UserProf
   };
 }
 
+export type UpdateUsernameResult = 'ok' | 'taken' | 'invalid';
+
+export async function updateUsername(uid: string, displayName: string): Promise<UpdateUsernameResult> {
+  const trimmed = displayName.trim();
+  if (trimmed.length < 3 || trimmed.length > 20) return 'invalid';
+
+  const { error } = await supabase.from('profiles').update({ display_name: trimmed }).eq('id', uid);
+  if (error) {
+    // 23505 = unique_violation: another profile already has this name (case-insensitive).
+    if (error.code === '23505') return 'taken';
+    throw error;
+  }
+  return 'ok';
+}
+
 export async function updateUserSettings(
   uid: string,
   patch: Partial<Pick<UserProfile, 'defaultRadiusKm' | 'notificationsEnabled' | 'friendNotificationsEnabled'>>

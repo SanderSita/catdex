@@ -74,6 +74,16 @@
     "title": "Privacy",
     "body": "Your sightings and photos are private to your account by default. If you add a friend and they accept, they can see your cats, sightings, and catch locations. Location data is never shared with anyone who isn't an accepted friend."
   },
+  "editUsername": {
+    "title": "Edit username",
+    "placeholder": "Username",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "invalid": "Username must be 3-20 characters.",
+    "taken": "That username is already taken.",
+    "error": "Could not update username."
+  },
   "friends": {
     "title": "Friends",
     "requestsSection": "Requests",
