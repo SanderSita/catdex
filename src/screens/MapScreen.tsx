@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Camera, ChevronDown, Users } from 'lucide-react-native';
-import { Circle, Marker } from 'react-native-maps';
+import { Circle, Marker, type Region } from 'react-native-maps';
+import type RNMapView from 'react-native-maps';
 import MapView from 'react-native-map-clustering';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
@@ -54,6 +55,8 @@ export function MapScreen({ navigation }: Props) {
   }, [publicNearby, nearby]);
 
   const sheetRef = useRef<BottomSheet>(null);
+  const mapRef = useRef<RNMapView | null>(null);
+  const zoomDeltaRef = useRef({ latitudeDelta: 0.02, longitudeDelta: 0.02 });
   const snapPoints = useMemo(() => [140, 320], []);
 
   useEffect(() => {
@@ -62,6 +65,22 @@ export function MapScreen({ navigation }: Props) {
       setRadiusInitialized(true);
     }
   }, [profile, radiusInitialized]);
+
+  // Map is locked to the device's current location — panning is disabled
+  // (see scrollEnabled below), so re-centering on every location update is
+  // the only way the view point ever moves. Preserves whatever zoom level
+  // the user last pinched to (captured in zoomDeltaRef).
+  useEffect(() => {
+    if (!coords || !mapRef.current) return;
+    mapRef.current.animateToRegion(
+      { latitude: coords.lat, longitude: coords.lng, ...zoomDeltaRef.current },
+      500
+    );
+  }, [coords?.lat, coords?.lng]);
+
+  const onRegionChangeComplete = useCallback((region: Region) => {
+    zoomDeltaRef.current = { latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta };
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -96,13 +115,19 @@ export function MapScreen({ navigation }: Props) {
       <View style={styles.mapWrap}>
         {coords ? (
           <MapView
+            mapRef={(ref) => {
+              mapRef.current = ref as unknown as RNMapView | null;
+            }}
             style={StyleSheet.absoluteFill}
             initialRegion={{
               latitude: coords.lat,
               longitude: coords.lng,
-              latitudeDelta: 0.02,
-              longitudeDelta: 0.02,
+              ...zoomDeltaRef.current,
             }}
+            onRegionChangeComplete={onRegionChangeComplete}
+            scrollEnabled={false}
+            pitchEnabled={false}
+            rotateEnabled={false}
             showsUserLocation
             clusterColor={colors.coral}
             clusterTextColor={colors.white}
