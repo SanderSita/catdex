@@ -8,7 +8,7 @@ import type { RootStackParamList } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { lookupFriendCode, sendFriendRequest, type ProfilePreview } from '../services/friendsService';
-import { CatThumb } from '../components/CatThumb';
+import { AvatarThumb } from '../components/AvatarThumb';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors, fonts } from '../theme';
 
@@ -129,7 +129,7 @@ export function AddFriendScreen({ route, navigation }: Props) {
       {found ? (
         <View style={styles.section}>
           <View style={styles.confirmCard}>
-            <CatThumb uri={found.avatarUrl} shape="circle" size={56} />
+            <AvatarThumb icon={found.avatarIcon} color={found.avatarColor} size={56} />
             <Text style={styles.confirmTitle}>{t('addFriend.confirmTitle', { name: found.displayName })}</Text>
             <PrimaryButton label={t('addFriend.sendRequest')} onPress={onSend} disabled={sending} style={{ width: '100%' }} />
           </View>
