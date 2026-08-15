@@ -13,6 +13,7 @@
     "radiusLabel": "{{km}} km radius",
     "radiusOption": "{{km}} km",
     "locating": "Locatie zoeken…",
+    "webUnsupported": "De kaart is nog niet beschikbaar in een webbrowser — open CatDex op iOS of Android om katten in de buurt te zien.",
     "newSighting": "Kat gevonden",
     "catsNearby_one": "{{count}} kat in de buurt",
     "catsNearby_other": "{{count}} katten in de buurt",

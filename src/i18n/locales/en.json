@@ -13,6 +13,7 @@
     "radiusLabel": "{{km}} km radius",
     "radiusOption": "{{km}} km",
     "locating": "Finding your location…",
+    "webUnsupported": "The map isn't available in a web browser yet — open CatDex on iOS or Android to see nearby cats.",
     "newSighting": "New Sighting",
     "catsNearby_one": "{{count}} cat nearby",
     "catsNearby_other": "{{count}} cats nearby",
