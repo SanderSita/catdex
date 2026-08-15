@@ -6,7 +6,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useUserCats } from '../hooks/useUserCats';
-import { CatThumb } from '../components/CatThumb';
+import { AvatarThumb } from '../components/AvatarThumb';
 import { StatTile } from '../components/StatTile';
 import { CatsGrid } from '../components/CatsGrid';
 import { colors, fonts } from '../theme';
@@ -35,7 +35,7 @@ export function FriendDetailScreen({ route, navigation }: Props) {
           </View>
 
           <View style={styles.avatarSection}>
-            <CatThumb uri={profile?.avatarUrl} shape="circle" size={88} />
+            <AvatarThumb icon={profile?.avatarIcon} color={profile?.avatarColor} size={88} />
             <Text style={styles.username}>{displayName}</Text>
           </View>
 

@@ -1,9 +1,12 @@
 import { supabase } from './supabase';
 import type { UserStats } from '../types/models';
+import { DEFAULT_AVATAR_COLOR, DEFAULT_AVATAR_ICON, isCatIconId, type CatIconId } from '../data/avatars';
 
 export interface UserProfile {
   displayName: string;
   avatarUrl: string | null;
+  avatarIcon: CatIconId;
+  avatarColor: string;
   joinedAt: number;
   defaultRadiusKm: number;
   notificationsEnabled: boolean;
@@ -15,6 +18,8 @@ export interface UserProfile {
 interface ProfileRow {
   display_name: string;
   avatar_url: string | null;
+  avatar_icon: string;
+  avatar_color: string;
   joined_at: string;
   default_radius_km: number;
   notifications_enabled: boolean;
@@ -29,6 +34,8 @@ function mapProfileRow(row: ProfileRow): UserProfile {
   return {
     displayName: row.display_name,
     avatarUrl: row.avatar_url,
+    avatarIcon: isCatIconId(row.avatar_icon) ? row.avatar_icon : DEFAULT_AVATAR_ICON,
+    avatarColor: row.avatar_color || DEFAULT_AVATAR_COLOR,
     joinedAt: new Date(row.joined_at).getTime(),
     defaultRadiusKm: row.default_radius_km,
     notificationsEnabled: row.notifications_enabled,
@@ -78,6 +85,11 @@ export async function updateUsername(uid: string, displayName: string): Promise<
     throw error;
   }
   return 'ok';
+}
+
+export async function updateAvatar(uid: string, icon: CatIconId, color: string): Promise<void> {
+  const { error } = await supabase.from('profiles').update({ avatar_icon: icon, avatar_color: color }).eq('id', uid);
+  if (error) throw error;
 }
 
 export async function updateUserSettings(

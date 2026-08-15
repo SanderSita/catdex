@@ -7,14 +7,15 @@ import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { supabase } from '../services/supabase';
-import { updateUserSettings, updateUsername, type UserProfile } from '../services/userService';
+import { updateAvatar, updateUserSettings, updateUsername, type UserProfile } from '../services/userService';
 import { subscribeToUnlockedAchievements } from '../services/achievementsService';
 import { ACHIEVEMENTS } from '../data/achievements';
-import { CatThumb } from '../components/CatThumb';
+import { AvatarThumb } from '../components/AvatarThumb';
 import { StatTile } from '../components/StatTile';
 import { AchievementBadge } from '../components/AchievementBadge';
 import { SettingsRow, SettingsSection } from '../components/SettingsRow';
 import { EditUsernameModal } from '../components/EditUsernameModal';
+import { AvatarPickerModal } from '../components/AvatarPickerModal';
 import { colors, fonts } from '../theme';
 
 type Props = TabScreenProps<'Profile'>;
@@ -28,6 +29,7 @@ export function ProfileScreen({ navigation }: Props) {
   const profile = useUserProfile(uid);
   const [unlocked, setUnlocked] = useState<Set<string>>(new Set());
   const [editingUsername, setEditingUsername] = useState(false);
+  const [editingAvatar, setEditingAvatar] = useState(false);
   type SettingsPatch = Partial<
     Pick<UserProfile, 'defaultRadiusKm' | 'notificationsEnabled' | 'friendNotificationsEnabled'>
   >;
@@ -95,7 +97,9 @@ export function ProfileScreen({ navigation }: Props) {
         ListHeaderComponent={
         <View>
           <View style={styles.avatarSection}>
-            <CatThumb uri={profile.avatarUrl} shape="circle" size={88} />
+            <Pressable onPress={() => setEditingAvatar(true)} hitSlop={8}>
+              <AvatarThumb icon={profile.avatarIcon} color={profile.avatarColor} size={88} />
+            </Pressable>
             <View style={styles.usernameRow}>
               <Text style={styles.username}>{profile.displayName}</Text>
               <Pressable style={styles.editButton} onPress={() => setEditingUsername(true)} hitSlop={8}>
@@ -152,6 +156,13 @@ export function ProfileScreen({ navigation }: Props) {
         currentName={profile.displayName}
         onSave={(name) => (uid ? updateUsername(uid, name) : Promise.resolve('invalid'))}
         onClose={() => setEditingUsername(false)}
+      />
+      <AvatarPickerModal
+        visible={editingAvatar}
+        currentIcon={profile.avatarIcon}
+        currentColor={profile.avatarColor}
+        onSave={(icon, color) => (uid ? updateAvatar(uid, icon, color) : Promise.resolve())}
+        onClose={() => setEditingAvatar(false)}
       />
     </>
   );

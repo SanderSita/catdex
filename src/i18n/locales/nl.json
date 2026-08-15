@@ -84,6 +84,12 @@
     "taken": "Die gebruikersnaam is al in gebruik.",
     "error": "Kon gebruikersnaam niet bijwerken."
   },
+  "avatarPicker": {
+    "title": "Kies je kat",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "cancel": "Annuleren"
+  },
   "friends": {
     "title": "Vrienden",
     "requestsSection": "Verzoeken",

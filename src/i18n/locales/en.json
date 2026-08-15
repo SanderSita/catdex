@@ -84,6 +84,12 @@
     "taken": "That username is already taken.",
     "error": "Could not update username."
   },
+  "avatarPicker": {
+    "title": "Choose your cat",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel"
+  },
   "friends": {
     "title": "Friends",
     "requestsSection": "Requests",

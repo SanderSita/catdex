@@ -13,7 +13,7 @@ import {
   otherUid,
   type ProfilePreview,
 } from '../services/friendsService';
-import { CatThumb } from '../components/CatThumb';
+import { AvatarThumb } from '../components/AvatarThumb';
 import { colors, fonts } from '../theme';
 
 type Props = TabScreenProps<'Friends'>;
@@ -23,7 +23,7 @@ function FriendRow({ friendUid, preview, onPress }: { friendUid: string; preview
   const cats = useUserCats(friendUid);
   return (
     <Pressable style={styles.row} onPress={onPress}>
-      <CatThumb uri={preview?.avatarUrl} shape="circle" size={44} />
+      <AvatarThumb icon={preview?.avatarIcon} color={preview?.avatarColor} size={44} />
       <View style={styles.rowText}>
         <Text style={styles.rowName}>{preview?.displayName ?? '…'}</Text>
         <Text style={styles.rowDetail}>{t('friends.catsCount', { count: cats.length })}</Text>
@@ -46,7 +46,7 @@ function RequestRow({
   const { t } = useTranslation();
   return (
     <View style={styles.row}>
-      <CatThumb uri={preview?.avatarUrl} shape="circle" size={44} />
+      <AvatarThumb icon={preview?.avatarIcon} color={preview?.avatarColor} size={44} />
       <View style={styles.rowText}>
         <Text style={styles.rowName}>{preview?.displayName ?? '…'}</Text>
         <Text style={styles.rowDetail}>{t('friends.pendingBadge')}</Text>

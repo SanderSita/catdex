@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import type { CatRecord } from '../types/models';
 import { mapCatRow, type CatRow } from './catsService';
+import { DEFAULT_AVATAR_COLOR, DEFAULT_AVATAR_ICON, isCatIconId, type CatIconId } from '../data/avatars';
 
 export type FriendshipStatus = 'pending' | 'accepted' | 'declined';
 
@@ -17,6 +18,18 @@ export interface ProfilePreview {
   userId: string;
   displayName: string;
   avatarUrl: string | null;
+  avatarIcon: CatIconId;
+  avatarColor: string;
+}
+
+function toProfilePreview(userId: string, row: { display_name: string; avatar_url: string | null; avatar_icon: string; avatar_color: string }): ProfilePreview {
+  return {
+    userId,
+    displayName: row.display_name,
+    avatarUrl: row.avatar_url,
+    avatarIcon: isCatIconId(row.avatar_icon) ? row.avatar_icon : DEFAULT_AVATAR_ICON,
+    avatarColor: row.avatar_color || DEFAULT_AVATAR_COLOR,
+  };
 }
 
 interface FriendshipRow {
@@ -124,7 +137,7 @@ export async function lookupFriendCode(code: string): Promise<ProfilePreview | n
   if (error) throw error;
   const row = Array.isArray(data) ? data[0] : data;
   if (!row) return null;
-  return { userId: row.user_id, displayName: row.display_name, avatarUrl: row.avatar_url };
+  return toProfilePreview(row.user_id, row);
 }
 
 export async function getProfilePreview(userId: string): Promise<ProfilePreview | null> {
@@ -132,7 +145,7 @@ export async function getProfilePreview(userId: string): Promise<ProfilePreview 
   if (error) throw error;
   const row = Array.isArray(data) ? data[0] : data;
   if (!row) return null;
-  return { userId, displayName: row.display_name, avatarUrl: row.avatar_url };
+  return toProfilePreview(userId, row);
 }
 
 export interface FriendCatchEvent {
