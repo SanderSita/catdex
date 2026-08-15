@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
-import type { CatRecord } from '../types/models';
-import { mapCatRow, type CatRow } from './catsService';
+import type { CatRow } from './catsService';
 
 export type FriendshipStatus = 'pending' | 'accepted' | 'declined';
 
@@ -179,30 +178,3 @@ export function subscribeToFriendsCatchEvents(friendUids: string[], onCatch: (ev
   };
 }
 
-/** Live-subscribes to accepted friends' cats, INSERT+UPDATE+DELETE, scoped to the given uids. */
-export function subscribeToFriendsCats(friendUids: string[], onChange: (cats: CatRecord[]) => void) {
-  if (friendUids.length === 0) {
-    onChange([]);
-    return () => {};
-  }
-
-  const load = async () => {
-    const { data, error } = await supabase.from('cats').select('*').in('user_id', friendUids);
-    if (error) return;
-    onChange((data as CatRow[]).map(mapCatRow));
-  };
-  load();
-
-  const channel = supabase
-    .channel(`friends-cats:${friendUids.join(',')}:${Math.random().toString(36).slice(2)}`)
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'cats', filter: `user_id=in.(${friendUids.join(',')})` },
-      load
-    )
-    .subscribe();
-
-  return () => {
-    supabase.removeChannel(channel);
-  };
-}

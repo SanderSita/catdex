@@ -168,6 +168,22 @@ export async function fetchNearbyCats(uid: string, lat: number, lng: number, rad
 }
 
 /**
+ * Any cat within radius, regardless of owner — the "wild sightings" public
+ * map feed. Radius is enforced server-side by the `nearby_cats` function, not
+ * just filtered client-side, so it can't be bypassed by calling the table
+ * directly (see 0009_public_nearby_cats.sql).
+ */
+export async function fetchPublicNearbyCats(lat: number, lng: number, radiusKm: number): Promise<CatRecord[]> {
+  const { data, error } = await supabase.rpc('nearby_cats', {
+    viewer_lat: lat,
+    viewer_lng: lng,
+    radius_km: radiusKm,
+  });
+  if (error) throw error;
+  return (data as CatRow[]).map(mapCatRow);
+}
+
+/**
  * Not filtered by viewer uid — relies purely on RLS (owner or accepted
  * friend), so this works whether the cat belongs to the caller or a friend.
  */

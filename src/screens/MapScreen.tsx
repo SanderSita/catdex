@@ -6,16 +6,18 @@ import MapView from 'react-native-map-clustering';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useTranslation } from 'react-i18next';
+import { useFocusEffect } from '@react-navigation/native';
 import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useFriendsStore } from '../store/useFriendsStore';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useLocation } from '../hooks/useLocation';
 import { useNearbyCats } from '../hooks/useNearbyCats';
-import { useFriendsNearbyCats } from '../hooks/useFriendsNearbyCats';
+import { usePublicNearbyCats } from '../hooks/usePublicNearbyCats';
 import { otherUid } from '../services/friendsService';
 import { CatThumb } from '../components/CatThumb';
 import { colors, fonts } from '../theme';
+import type { CatRecord } from '../types/models';
 
 const RADIUS_OPTIONS = [1, 3, 5, 10];
 
@@ -32,13 +34,25 @@ export function MapScreen({ navigation }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [showFriends, setShowFriends] = useState(false);
   const { nearby } = useNearbyCats(uid, coords, radiusKm);
+  const { cats: publicNearby, refetch: refetchPublicNearby } = usePublicNearbyCats(coords, radiusKm);
 
   const friendships = useFriendsStore((s) => s.friendships);
   const acceptedFriendUids = useMemo(
     () => (uid ? friendships.filter((f) => f.status === 'accepted').map((f) => otherUid(f, uid)) : []),
     [friendships, uid]
   );
-  const { nearby: friendsNearby } = useFriendsNearbyCats(showFriends ? acceptedFriendUids : [], coords, radiusKm);
+  const friendUidSet = useMemo(() => new Set(acceptedFriendUids), [acceptedFriendUids]);
+
+  // Own cats come from a live subscription (instant feedback right after a
+  // catch); public cats are refetched on radius/location change. Merge by
+  // id, preferring the live copy so your own pins never look stale.
+  const visibleCats = useMemo(() => {
+    const merged = new Map<string, CatRecord>();
+    publicNearby.forEach((cat) => merged.set(cat.id, cat));
+    nearby.forEach((cat) => merged.set(cat.id, cat));
+    return Array.from(merged.values());
+  }, [publicNearby, nearby]);
+
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => [140, 320], []);
 
@@ -48,6 +62,12 @@ export function MapScreen({ navigation }: Props) {
       setRadiusInitialized(true);
     }
   }, [profile, radiusInitialized]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetchPublicNearby();
+    }, [refetchPublicNearby])
+  );
 
   const openCamera = useCallback(() => navigation.navigate('Camera'), [navigation]);
   const openCat = useCallback((catId: string) => navigation.navigate('CatDetail', { catId }), [navigation]);
@@ -93,29 +113,20 @@ export function MapScreen({ navigation }: Props) {
               strokeColor={colors.teal}
               fillColor="rgba(78,147,168,0.12)"
             />
-            {nearby.map((cat) => (
-              <Marker
-                key={cat.id}
-                coordinate={{ latitude: cat.lat, longitude: cat.lng }}
-                onPress={() => openCat(cat.id)}
-              >
-                <View style={styles.pin}>
-                  <CatThumb uri={cat.primaryPhotoUrl} shape="circle" />
-                </View>
-              </Marker>
-            ))}
-            {showFriends &&
-              friendsNearby.map((cat) => (
+            {visibleCats.map((cat) => {
+              const isFriend = showFriends && cat.userId !== uid && friendUidSet.has(cat.userId);
+              return (
                 <Marker
                   key={cat.id}
                   coordinate={{ latitude: cat.lat, longitude: cat.lng }}
                   onPress={() => openCat(cat.id)}
                 >
-                  <View style={[styles.pin, styles.pinFriend]}>
+                  <View style={[styles.pin, isFriend ? styles.pinFriend : null]}>
                     <CatThumb uri={cat.primaryPhotoUrl} shape="circle" />
                   </View>
                 </Marker>
-              ))}
+              );
+            })}
           </MapView>
         ) : (
           <View style={[StyleSheet.absoluteFill, styles.mapLoading]}>
@@ -131,17 +142,17 @@ export function MapScreen({ navigation }: Props) {
 
       <BottomSheet ref={sheetRef} snapPoints={snapPoints} index={0} backgroundStyle={styles.sheetBg}>
         <BottomSheetView style={styles.sheetContent}>
-          <Text style={styles.sheetTitle}>{t('map.catsNearby', { count: nearby.length })}</Text>
+          <Text style={styles.sheetTitle}>{t('map.catsNearby', { count: visibleCats.length })}</Text>
           <FlatList
             horizontal
-            data={nearby.slice(0, 3)}
+            data={visibleCats.slice(0, 3)}
             keyExtractor={(item) => item.id}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: 10 }}
             ListFooterComponent={
-              nearby.length > 3 ? (
+              visibleCats.length > 3 ? (
                 <View style={styles.overflowTile}>
-                  <Text style={styles.overflowText}>+{nearby.length - 3}</Text>
+                  <Text style={styles.overflowText}>+{visibleCats.length - 3}</Text>
                 </View>
               ) : null
             }
