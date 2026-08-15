@@ -1,12 +1,20 @@
+import type { ComponentType } from 'react';
+
 export interface Breed {
   id: string;
   /** Label(s) the Roboflow model returns that map to this breed. */
   modelLabels: string[];
 }
 
+export interface AchievementIconProps {
+  size: number;
+  color: string;
+}
+
 export interface Achievement {
   id: string;
   color: string;
+  icon: ComponentType<AchievementIconProps>;
   /** 0-1 fraction toward unlocking, for badges with a meaningful threshold. Omit for boolean-only badges. */
   progress?: (stats: UserStats) => number;
 }

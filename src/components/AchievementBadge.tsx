@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { tKey } from '../i18n';
 import type { Achievement, UserStats } from '../types/models';
 import { colors, fonts } from '../theme';
+import { AchievementIconBadge } from './AchievementIconBadge';
 
 const BADGE_SIZE = 52;
 const RING_STROKE = 4;
@@ -52,12 +53,7 @@ export function AchievementBadge({ achievement, unlocked, stats }: Props) {
             />
           </Svg>
         ) : null}
-        <View
-          style={[
-            styles.circle,
-            { backgroundColor: achievement.color, opacity: unlocked ? 1 : 0.3 },
-          ]}
-        />
+        <AchievementIconBadge achievement={achievement} unlocked={unlocked} size={BADGE_SIZE} />
       </View>
       <Text style={styles.label}>{tKey(t, `achievements.${achievement.id}`)}</Text>
     </View>
@@ -68,6 +64,5 @@ const styles = StyleSheet.create({
   cell: { width: '30%', alignItems: 'center', gap: 6 },
   stack: { width: OUTER_SIZE, height: OUTER_SIZE, alignItems: 'center', justifyContent: 'center' },
   ring: { position: 'absolute' },
-  circle: { width: BADGE_SIZE, height: BADGE_SIZE, borderRadius: BADGE_SIZE / 2 },
   label: { fontFamily: fonts.bodySemi, fontSize: 10.5, color: colors.textMid, textAlign: 'center' },
 });
