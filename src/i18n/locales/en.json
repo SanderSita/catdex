@@ -23,7 +23,7 @@
     "progress": "{{unlocked}} of {{total}} breeds discovered",
     "breedsTab": "Breeds",
     "catsTab": "My Cats",
-    "empty": "No cats caught yet — go find one!"
+    "empty": "No cats caught yet, go find one!"
   },
   "camera": {
     "permission": "CatDex needs camera access to photograph cats.",
@@ -88,7 +88,7 @@
     "title": "Friends",
     "requestsSection": "Requests",
     "friendsSection": "Friends",
-    "empty": "No friends yet — add one to see their cats.",
+    "empty": "No friends yet, add one to see their cats.",
     "accept": "Accept",
     "decline": "Decline",
     "addFriend": "Add friend",

@@ -7,7 +7,7 @@ import type { TabScreenProps } from '../navigation/types';
 import { useAuthStore } from '../store/useAuthStore';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { supabase } from '../services/supabase';
-import { updateUserSettings, updateUsername } from '../services/userService';
+import { updateUserSettings, updateUsername, type UserProfile } from '../services/userService';
 import { subscribeToUnlockedAchievements } from '../services/achievementsService';
 import { ACHIEVEMENTS } from '../data/achievements';
 import { CatThumb } from '../components/CatThumb';
@@ -28,33 +28,63 @@ export function ProfileScreen({ navigation }: Props) {
   const profile = useUserProfile(uid);
   const [unlocked, setUnlocked] = useState<Set<string>>(new Set());
   const [editingUsername, setEditingUsername] = useState(false);
+  type SettingsPatch = Partial<
+    Pick<UserProfile, 'defaultRadiusKm' | 'notificationsEnabled' | 'friendNotificationsEnabled'>
+  >;
+  const [pendingSettings, setPendingSettings] = useState<SettingsPatch>({});
 
   useEffect(() => {
     if (!uid) return;
     return subscribeToUnlockedAchievements(uid, setUnlocked);
   }, [uid]);
 
+  // Clear optimistic fields once the server-confirmed profile catches up, so a
+  // rejected write doesn't leave the UI permanently out of sync.
+  useEffect(() => {
+    if (!profile) return;
+    setPendingSettings((prev) => {
+      const keys = Object.keys(prev) as (keyof SettingsPatch)[];
+      const next = keys.reduce((acc, key) => {
+        if (profile[key] !== prev[key]) acc[key] = prev[key] as never;
+        return acc;
+      }, {} as SettingsPatch);
+      const changed = keys.some((key) => !(key in next));
+      return changed ? next : prev;
+    });
+  }, [profile]);
+
   if (!profile) return <View style={styles.container} />;
+
+  const displayProfile = { ...profile, ...pendingSettings };
 
   const joinedLabel = new Date(profile.joinedAt).toLocaleDateString(i18n.language === 'nl' ? 'nl-NL' : 'en-US', {
     month: 'long',
     year: 'numeric',
   });
 
-  const cycleRadius = () => {
+  const applySetting = (patch: SettingsPatch) => {
     if (!uid) return;
-    const next = RADIUS_CYCLE[(RADIUS_CYCLE.indexOf(profile.defaultRadiusKm) + 1) % RADIUS_CYCLE.length];
-    updateUserSettings(uid, { defaultRadiusKm: next });
+    setPendingSettings((prev) => ({ ...prev, ...patch }));
+    updateUserSettings(uid, patch).catch(() => {
+      setPendingSettings((prev) => {
+        const next = { ...prev };
+        for (const key of Object.keys(patch) as (keyof SettingsPatch)[]) delete next[key];
+        return next;
+      });
+    });
+  };
+
+  const cycleRadius = () => {
+    const next = RADIUS_CYCLE[(RADIUS_CYCLE.indexOf(displayProfile.defaultRadiusKm) + 1) % RADIUS_CYCLE.length];
+    applySetting({ defaultRadiusKm: next });
   };
 
   const toggleNotifications = () => {
-    if (!uid) return;
-    updateUserSettings(uid, { notificationsEnabled: !profile.notificationsEnabled });
+    applySetting({ notificationsEnabled: !displayProfile.notificationsEnabled });
   };
 
   const toggleFriendNotifications = () => {
-    if (!uid) return;
-    updateUserSettings(uid, { friendNotificationsEnabled: !profile.friendNotificationsEnabled });
+    applySetting({ friendNotificationsEnabled: !displayProfile.friendNotificationsEnabled });
   };
 
   return (
@@ -94,17 +124,17 @@ export function ProfileScreen({ navigation }: Props) {
             <SettingsSection header={t('profile.settingsHeader')}>
               <SettingsRow
                 title={t('profile.searchRadius')}
-                detail={t('map.radiusOption', { km: profile.defaultRadiusKm })}
+                detail={t('map.radiusOption', { km: displayProfile.defaultRadiusKm })}
                 onPress={cycleRadius}
               />
               <SettingsRow
                 title={t('profile.notifications')}
-                detail={profile.notificationsEnabled ? t('profile.on') : t('profile.off')}
+                detail={displayProfile.notificationsEnabled ? t('profile.on') : t('profile.off')}
                 onPress={toggleNotifications}
               />
               <SettingsRow
                 title={t('profile.friendNotifications')}
-                detail={profile.friendNotificationsEnabled ? t('profile.on') : t('profile.off')}
+                detail={displayProfile.friendNotificationsEnabled ? t('profile.on') : t('profile.off')}
                 onPress={toggleFriendNotifications}
               />
               <SettingsRow title={t('privacy.title')} onPress={() => navigation.navigate('Privacy')} />

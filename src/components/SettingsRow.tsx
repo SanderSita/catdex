@@ -13,7 +13,15 @@ interface SettingsRowProps {
 
 export function SettingsRow({ title, detail, chevron = true, isLast, onPress }: SettingsRowProps) {
   return (
-    <Pressable onPress={onPress} style={[styles.row, isLast ? null : styles.divider]}>
+    <Pressable
+      onPress={onPress}
+      hitSlop={4}
+      style={({ pressed }) => [
+        styles.row,
+        isLast ? null : styles.divider,
+        pressed ? styles.rowPressed : null,
+      ]}
+    >
       <Text style={styles.title}>{title}</Text>
       <View style={styles.right}>
         {detail ? <Text style={styles.detail}>{detail}</Text> : null}
@@ -57,6 +65,9 @@ const styles = StyleSheet.create({
   divider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.creamMuted2,
+  },
+  rowPressed: {
+    backgroundColor: colors.creamMuted,
   },
   title: {
     fontFamily: fonts.bodyMedium,
