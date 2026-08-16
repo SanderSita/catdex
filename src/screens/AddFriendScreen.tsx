@@ -90,7 +90,7 @@ export function AddFriendScreen({ route, navigation }: Props) {
           <X size={18} color={colors.textMid} />
         </Pressable>
         <Text style={styles.title}>{t('addFriend.title')}</Text>
-        <View style={styles.closeButton} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.section}>
@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  headerSpacer: { width: 36, height: 36 },
   title: { fontFamily: fonts.headingSemi, fontSize: 18, color: colors.textDark },
   section: { paddingHorizontal: 20, paddingTop: 18 },
   fieldLabel: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.textMid, marginBottom: 8 },

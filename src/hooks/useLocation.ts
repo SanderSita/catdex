@@ -13,18 +13,22 @@ export function useLocation() {
   useEffect(() => {
     let sub: Location.LocationSubscription | null = null;
     (async () => {
-      const { status: permission } = await Location.requestForegroundPermissionsAsync();
-      if (permission !== 'granted') {
+      try {
+        const { status: permission } = await Location.requestForegroundPermissionsAsync();
+        if (permission !== 'granted') {
+          setStatus('denied');
+          return;
+        }
+        setStatus('granted');
+        const initial = await Location.getCurrentPositionAsync({});
+        setCoords({ lat: initial.coords.latitude, lng: initial.coords.longitude });
+        sub = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.Balanced, distanceInterval: 25 },
+          (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        );
+      } catch {
         setStatus('denied');
-        return;
       }
-      setStatus('granted');
-      const initial = await Location.getCurrentPositionAsync({});
-      setCoords({ lat: initial.coords.latitude, lng: initial.coords.longitude });
-      sub = await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.Balanced, distanceInterval: 25 },
-        (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-      );
     })();
     return () => sub?.remove();
   }, []);
