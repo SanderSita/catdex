@@ -24,6 +24,11 @@ import type { CatRecord } from '../types/models';
 
 const RADIUS_OPTIONS = [1, 3, 5, 10];
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+// scrollEnabled only blocks one-finger panning — both Google Maps and Apple
+// MapKit still let the pinch-zoom gesture drag the map center, which is how
+// a locked map can end up zoomed into a different location. Anything past
+// this tolerance (~500m) is that drift, not deliberate local exploration.
+const DRIFT_TOLERANCE_DEG = 0.005;
 
 type Props = TabScreenProps<'Map'>;
 
@@ -81,9 +86,21 @@ export function MapScreen({ navigation }: Props) {
     );
   }, [coords?.lat, coords?.lng]);
 
-  const onRegionChangeComplete = useCallback((region: Region) => {
-    zoomDeltaRef.current = { latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta };
-  }, []);
+  const onRegionChangeComplete = useCallback(
+    (region: Region) => {
+      zoomDeltaRef.current = { latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta };
+      if (!coords) return;
+      const driftedLat = Math.abs(region.latitude - coords.lat) > DRIFT_TOLERANCE_DEG;
+      const driftedLng = Math.abs(region.longitude - coords.lng) > DRIFT_TOLERANCE_DEG;
+      if (driftedLat || driftedLng) {
+        mapRef.current?.animateToRegion(
+          { latitude: coords.lat, longitude: coords.lng, ...zoomDeltaRef.current },
+          300
+        );
+      }
+    },
+    [coords]
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -140,6 +157,7 @@ export function MapScreen({ navigation }: Props) {
             }}
             onRegionChangeComplete={onRegionChangeComplete}
             scrollEnabled={false}
+            scrollDuringRotateOrZoomEnabled={false}
             pitchEnabled={false}
             rotateEnabled={false}
             showsUserLocation
