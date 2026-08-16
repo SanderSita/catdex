@@ -193,7 +193,7 @@ export function MapScreen({ navigation }: Props) {
       </View>
 
       <AnimatedPressable
-        style={[styles.fab, fabPress.animatedStyle]}
+        style={[styles.fab, visibleCats.length === 0 ? styles.fabLowered : null, fabPress.animatedStyle]}
         onPress={openCamera}
         onPressIn={fabPress.onPressIn}
         onPressOut={fabPress.onPressOut}
@@ -314,6 +314,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.coral,
     ...fabShadow,
   },
+  // The sheet uses @gorhom/bottom-sheet's dynamic sizing, so its collapsed
+  // height shrinks to fit its content. With no cats nearby the sheet only
+  // shows its title (no preview row), which leaves a large gap above it at
+  // the default offset — pull the FAB down to match the shorter sheet.
+  fabLowered: { bottom: 100 },
   fabLabel: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.white },
   sheetBg: {
     backgroundColor: colors.card,
