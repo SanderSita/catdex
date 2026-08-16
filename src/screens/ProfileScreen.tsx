@@ -141,7 +141,11 @@ export function ProfileScreen({ navigation }: Props) {
                 detail={displayProfile.friendNotificationsEnabled ? t('profile.on') : t('profile.off')}
                 onPress={toggleFriendNotifications}
               />
-              <SettingsRow title={t('privacy.title')} onPress={() => navigation.navigate('Privacy')} />
+              <SettingsRow
+                title={t('privacy.title')}
+                detail={displayProfile.isPrivate ? t('privacy.private') : t('privacy.public')}
+                onPress={() => navigation.navigate('Privacy')}
+              />
               <SettingsRow title={t('profile.logOut')} chevron={false} isLast onPress={() => supabase.auth.signOut()} />
             </SettingsSection>
           </View>

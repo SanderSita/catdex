@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -160,7 +162,16 @@ export function NewSightingScreen({ route, navigation }: Props) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+    >
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+        keyboardShouldPersistTaps="handled"
+      >
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <Pressable style={styles.closeButton} onPress={() => navigation.goBack()}>
           <X size={18} color={colors.textMid} />
@@ -168,7 +179,6 @@ export function NewSightingScreen({ route, navigation }: Props) {
         <View style={styles.newSightingBadge}>
           <Text style={styles.newSightingText}>{t('newSighting.title')}</Text>
         </View>
-        <View style={styles.closeButton} />
       </View>
 
       <View style={styles.photoWrap}>
@@ -257,7 +267,8 @@ export function NewSightingScreen({ route, navigation }: Props) {
       ) : unlockedQueue.length > 0 ? (
         <AchievementUnlockModal queue={unlockedQueue} onDone={onCelebrationDone} />
       ) : null}
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
