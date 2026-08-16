@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { Camera, ChevronDown, Users } from 'lucide-react-native';
 import { Circle, Marker, type Region } from 'react-native-maps';
 import type RNMapView from 'react-native-maps';
@@ -17,10 +18,12 @@ import { useNearbyCats } from '../hooks/useNearbyCats';
 import { usePublicNearbyCats } from '../hooks/usePublicNearbyCats';
 import { otherUid } from '../services/friendsService';
 import { CatThumb } from '../components/CatThumb';
-import { colors, fonts } from '../theme';
+import { usePressScale } from '../hooks/usePressScale';
+import { colors, fonts, shadows, fabShadow } from '../theme';
 import type { CatRecord } from '../types/models';
 
 const RADIUS_OPTIONS = [1, 3, 5, 10];
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type Props = TabScreenProps<'Map'>;
 
@@ -91,24 +94,35 @@ export function MapScreen({ navigation }: Props) {
   const openCamera = useCallback(() => navigation.navigate('Camera'), [navigation]);
   const openCat = useCallback((catId: string) => navigation.navigate('CatDetail', { catId }), [navigation]);
 
+  const friendsPress = usePressScale({ pressedScale: 0.95 });
+  const radiusPress = usePressScale({ pressedScale: 0.95 });
+  const fabPress = usePressScale({ pressedScale: 0.95 });
+
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <Text style={styles.title}>{t('map.title')}</Text>
         <View style={styles.headerChips}>
-          <Pressable
-            style={[styles.friendsChip, showFriends ? styles.friendsChipActive : null]}
+          <AnimatedPressable
+            style={[styles.friendsChip, showFriends ? styles.friendsChipActive : null, friendsPress.animatedStyle]}
             onPress={() => setShowFriends((v) => !v)}
+            onPressIn={friendsPress.onPressIn}
+            onPressOut={friendsPress.onPressOut}
           >
             <Users size={14} color={showFriends ? colors.white : colors.tealTextSoft} />
             <Text style={[styles.radiusText, showFriends ? styles.friendsChipTextActive : null]}>
               {t('map.friendsToggle')}
             </Text>
-          </Pressable>
-          <Pressable style={styles.radiusChip} onPress={() => setPickerOpen(true)}>
+          </AnimatedPressable>
+          <AnimatedPressable
+            style={[styles.radiusChip, radiusPress.animatedStyle]}
+            onPress={() => setPickerOpen(true)}
+            onPressIn={radiusPress.onPressIn}
+            onPressOut={radiusPress.onPressOut}
+          >
             <Text style={styles.radiusText}>{t('map.radiusLabel', { km: radiusKm })}</Text>
             <ChevronDown size={14} color={colors.tealTextSoft} />
-          </Pressable>
+          </AnimatedPressable>
         </View>
       </View>
 
@@ -160,10 +174,15 @@ export function MapScreen({ navigation }: Props) {
         )}
       </View>
 
-      <Pressable style={styles.fab} onPress={openCamera}>
+      <AnimatedPressable
+        style={[styles.fab, fabPress.animatedStyle]}
+        onPress={openCamera}
+        onPressIn={fabPress.onPressIn}
+        onPressOut={fabPress.onPressOut}
+      >
         <Camera size={20} color={colors.white} strokeWidth={2.5} />
         <Text style={styles.fabLabel}>{t('map.newSighting')}</Text>
-      </Pressable>
+      </AnimatedPressable>
 
       <BottomSheet ref={sheetRef} snapPoints={snapPoints} index={0} backgroundStyle={styles.sheetBg}>
         <BottomSheetView style={styles.sheetContent}>
@@ -231,6 +250,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
+    ...shadows.level1,
   },
   radiusText: { fontFamily: fonts.bodySemi, fontSize: 14, color: colors.tealTextSoft },
   friendsChip: {
@@ -241,6 +261,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
+    ...shadows.level1,
   },
   friendsChipActive: { backgroundColor: colors.teal },
   friendsChipTextActive: { color: colors.white },
@@ -273,13 +294,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 26,
     backgroundColor: colors.coral,
-    shadowColor: colors.coral,
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
+    ...fabShadow,
   },
   fabLabel: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.white },
-  sheetBg: { backgroundColor: colors.card, borderTopLeftRadius: 26, borderTopRightRadius: 26 },
+  sheetBg: {
+    backgroundColor: colors.card,
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
+    ...shadows.floating,
+  },
   sheetContent: { paddingHorizontal: 20, paddingTop: 4 },
   sheetTitle: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.textDark, marginBottom: 12 },
   previewTile: { width: 56, height: 56, borderRadius: 16, overflow: 'hidden' },
@@ -293,7 +316,13 @@ const styles = StyleSheet.create({
   },
   overflowText: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.tealTextMuted },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-end' },
-  pickerSheet: { backgroundColor: colors.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingVertical: 8 },
+  pickerSheet: {
+    backgroundColor: colors.card,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingVertical: 8,
+    ...shadows.floating,
+  },
   pickerRow: { paddingVertical: 16, paddingHorizontal: 24 },
   pickerLabel: { fontFamily: fonts.bodyMedium, fontSize: 16, color: colors.textDark, textAlign: 'center' },
 });

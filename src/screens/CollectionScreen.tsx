@@ -1,8 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Lock } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { tKey } from '../i18n';
 import type { TabScreenProps } from '../navigation/types';
@@ -12,13 +20,70 @@ import { BREEDS } from '../data/breeds';
 import { CatThumb } from '../components/CatThumb';
 import { CatsGrid } from '../components/CatsGrid';
 import { ProgressBar } from '../components/ProgressBar';
-import { colors, fonts } from '../theme';
+import { usePressScale } from '../hooks/usePressScale';
+import { colors, fonts, shadows, TIMING_MEDIUM } from '../theme';
 
 type Props = TabScreenProps<'Collection'>;
 
 type Tab = 'breeds' | 'cats';
 
 const TABS: Tab[] = ['breeds', 'cats'];
+
+/** Wraps a grid cell in a small staggered fade+rise-in on mount, for a game-menu-reveal feel. */
+function AnimatedGridCell({ index, children }: { index: number; children: React.ReactNode }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withDelay(Math.min(index, 20) * 30, withTiming(1, TIMING_MEDIUM));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: (1 - progress.value) * 10 }],
+  }));
+
+  return <Animated.View style={[styles.gridCell, style]}>{children}</Animated.View>;
+}
+
+interface BreedTileProps {
+  unlocked: boolean;
+  photoUrl: string | null;
+  label: string;
+  onPress?: () => void;
+}
+
+function BreedTile({ unlocked, photoUrl, label, onPress }: BreedTileProps) {
+  const { onPressIn, onPressOut, animatedStyle } = usePressScale({ pressedScale: 0.94, haptic: false });
+
+  if (!unlocked) {
+    return (
+      <View style={styles.tileContent}>
+        <View style={styles.lockedTile}>
+          <LinearGradient
+            colors={['rgba(58,52,46,0.05)', 'rgba(58,52,46,0.22)']}
+            style={StyleSheet.absoluteFill}
+          />
+          <Lock size={20} color={colors.textLight} />
+        </View>
+        <Text style={styles.tileLabel} numberOfLines={1}>
+          {label}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <Pressable style={styles.tileContent} onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
+      <Animated.View style={[styles.unlockedTile, animatedStyle]}>
+        <CatThumb uri={photoUrl} shape="rounded" />
+      </Animated.View>
+      <Text style={styles.tileLabelUnlocked} numberOfLines={1}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
 
 export function CollectionScreen({ navigation }: Props) {
   const { t } = useTranslation();
@@ -60,7 +125,7 @@ export function CollectionScreen({ navigation }: Props) {
   const breedTiles = useMemo(() => {
     return BREEDS.map((breed) => {
       const owned = cats.find((c) => c.breedId === breed.id);
-      return { breed, unlocked: Boolean(owned), photoUrl: owned?.primaryPhotoUrl ?? null };
+      return { breed, unlocked: Boolean(owned), photoUrl: owned?.primaryPhotoUrl ?? null, catId: owned?.id ?? null };
     });
   }, [cats]);
 
@@ -109,22 +174,15 @@ export function CollectionScreen({ navigation }: Props) {
                 numColumns={3}
                 columnWrapperStyle={{ gap: 10 }}
                 contentContainerStyle={styles.grid}
-                renderItem={({ item }) => (
-                  <View style={styles.gridCell}>
-                    {item.unlocked ? (
-                      <CatThumb uri={item.photoUrl} shape="rounded" />
-                    ) : (
-                      <View style={styles.lockedTile}>
-                        <View style={styles.lockedDot} />
-                      </View>
-                    )}
-                    <Text
-                      style={[styles.tileLabel, item.unlocked ? styles.tileLabelUnlocked : null]}
-                      numberOfLines={1}
-                    >
-                      {tKey(t, `breeds.${item.breed.id}`)}
-                    </Text>
-                  </View>
+                renderItem={({ item, index }) => (
+                  <AnimatedGridCell index={index}>
+                    <BreedTile
+                      unlocked={item.unlocked}
+                      photoUrl={item.photoUrl}
+                      label={tKey(t, `breeds.${item.breed.id}`)}
+                      onPress={item.catId ? () => navigation.navigate('CatDetail', { catId: item.catId! }) : undefined}
+                    />
+                  </AnimatedGridCell>
                 )}
               />
             </View>
@@ -159,7 +217,14 @@ const styles = StyleSheet.create({
   pagerViewport: { flex: 1, overflow: 'hidden' },
   pager: { flex: 1, flexDirection: 'row' },
   grid: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 24, gap: 10 },
-  gridCell: { flex: 1 / 3, alignItems: 'center', gap: 6 },
+  gridCell: { flex: 1 / 3 },
+  tileContent: { alignItems: 'center', gap: 6 },
+  unlockedTile: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 18,
+    ...shadows.level1,
+  },
   lockedTile: {
     width: '100%',
     aspectRatio: 1,
@@ -167,8 +232,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.creamMuted2,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  lockedDot: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.creamMuted3 },
   tileLabel: { fontFamily: fonts.bodySemi, fontSize: 11, textAlign: 'center', color: colors.textLight },
   tileLabelUnlocked: { fontFamily: fonts.bodySemi, fontSize: 11, textAlign: 'center', color: colors.textDark },
 });

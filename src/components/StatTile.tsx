@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, fonts } from '../theme';
+import { colors, fonts, shadows } from '../theme';
 
 export function StatTile({ value, label, dark }: { value: string | number; label: string; dark?: boolean }) {
   return (
@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 12,
     alignItems: 'center',
+    ...shadows.level1,
   },
   tileDark: {
     backgroundColor: colors.card,

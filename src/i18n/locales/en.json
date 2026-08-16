@@ -132,6 +132,11 @@
     "nice": "Nice!",
     "next": "Next"
   },
+  "catCaught": {
+    "title": "Gotcha!",
+    "subtitle": "{{name}} joined your CatDex",
+    "nice": "Awesome!"
+  },
   "errors": {
     "connectionFailed": "Could not connect: {{error}}",
     "signInFailed": "Anonymous sign-in failed.",

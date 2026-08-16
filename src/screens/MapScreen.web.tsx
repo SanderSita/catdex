@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { TabScreenProps } from '../navigation/types';
 import { useLocation } from '../hooks/useLocation';
-import { colors, fonts } from '../theme';
+import { colors, fonts, fabShadow } from '../theme';
 
 type Props = TabScreenProps<'Map'>;
 
@@ -55,10 +55,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 26,
     backgroundColor: colors.coral,
-    shadowColor: colors.coral,
-    shadowOpacity: 0.45,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
+    ...fabShadow,
   },
   fabLabel: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.white },
 });

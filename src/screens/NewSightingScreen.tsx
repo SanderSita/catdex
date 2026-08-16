@@ -25,10 +25,13 @@ import { classifyBreed, type BreedGuess } from '../services/breedService';
 import { breedNameById } from '../data/breeds';
 import { ACHIEVEMENTS } from '../data/achievements';
 import { CatThumb } from '../components/CatThumb';
+import { Card } from '../components/Card';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { AchievementUnlockModal } from '../components/AchievementUnlockModal';
+import { CatCaughtModal } from '../components/CatCaughtModal';
 import type { Achievement, CatRecord } from '../types/models';
 import { colors, fonts } from '../theme';
+import * as haptics from '../utils/haptics';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NewSighting'>;
 
@@ -50,6 +53,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [unlockedQueue, setUnlockedQueue] = useState<Achievement[]>([]);
   const [pendingCatId, setPendingCatId] = useState<string | null>(null);
+  const [caughtInfo, setCaughtInfo] = useState<{ name: string; photoUrl: string } | null>(null);
 
   useEffect(() => {
     Location.reverseGeocodeAsync({ latitude: lat, longitude: lng })
@@ -127,16 +131,26 @@ export function NewSightingScreen({ route, navigation }: Props) {
             .filter((a): a is Achievement => Boolean(a))
         : [];
 
-      if (newlyUnlocked.length > 0) {
-        setPendingCatId(catId);
-        setUnlockedQueue(newlyUnlocked);
-        setSaving(false);
-      } else {
+      setSaving(false);
+      setPendingCatId(catId);
+      setUnlockedQueue(newlyUnlocked);
+
+      if (!existingCatId) {
+        haptics.catchCelebration();
+        setCaughtInfo({ name: name.trim(), photoUrl: uploadedUrl });
+      } else if (newlyUnlocked.length === 0) {
         navigation.replace('CatDetail', { catId });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('newSighting.saveError'));
       setSaving(false);
+    }
+  };
+
+  const onCatchDone = () => {
+    setCaughtInfo(null);
+    if (unlockedQueue.length === 0 && pendingCatId) {
+      navigation.replace('CatDetail', { catId: pendingCatId });
     }
   };
 
@@ -162,7 +176,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
       </View>
 
       <View style={styles.section}>
-        <View style={styles.breedCard}>
+        <Card tint="teal" style={styles.breedCard}>
           <View>
             <Text style={styles.breedLabel}>{t('newSighting.suggestedBreed')}</Text>
             <Text style={styles.breedName}>
@@ -174,7 +188,7 @@ export function NewSightingScreen({ route, navigation }: Props) {
           ) : !breedOverrideId && guess ? (
             <Text style={styles.matchPercent}>{t('newSighting.matchPercent', { confidence: guess.confidencePercent })}</Text>
           ) : null}
-        </View>
+        </Card>
         <Pressable style={styles.searchLink} onPress={() => navigation.navigate('BreedSearch')}>
           <Text style={styles.searchLinkText}>{t('newSighting.notRight')}</Text>
         </Pressable>
@@ -211,7 +225,10 @@ export function NewSightingScreen({ route, navigation }: Props) {
               const selected = existingCatId === item.id;
               return (
                 <Pressable
-                  onPress={() => setExistingCatId(selected ? null : item.id)}
+                  onPress={() => {
+                    haptics.tapMedium();
+                    setExistingCatId(selected ? null : item.id);
+                  }}
                   style={[styles.existingCatTile, selected ? styles.existingCatTileSelected : null]}
                 >
                   <CatThumb uri={item.primaryPhotoUrl} shape="circle" size={48} />
@@ -235,7 +252,9 @@ export function NewSightingScreen({ route, navigation }: Props) {
         />
       </View>
 
-      {unlockedQueue.length > 0 ? (
+      {caughtInfo ? (
+        <CatCaughtModal name={caughtInfo.name} photoUrl={caughtInfo.photoUrl} onDone={onCatchDone} />
+      ) : unlockedQueue.length > 0 ? (
         <AchievementUnlockModal queue={unlockedQueue} onDone={onCelebrationDone} />
       ) : null}
     </ScrollView>
@@ -264,8 +283,6 @@ const styles = StyleSheet.create({
   photoWrap: { paddingHorizontal: 20, paddingTop: 14, aspectRatio: 1, borderRadius: 24, overflow: 'hidden' },
   section: { paddingHorizontal: 20, paddingTop: 16 },
   breedCard: {
-    backgroundColor: colors.tealBgSoft,
-    borderRadius: 18,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',

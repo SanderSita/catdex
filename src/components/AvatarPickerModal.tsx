@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors, fonts } from '../theme';
+import { colors, fonts, shadows } from '../theme';
 import { PrimaryButton } from './PrimaryButton';
 import { CatFaceIcon } from './avatar/CatFaceIcon';
 import { AVATAR_COLORS, CAT_ICON_IDS, type CatIconId } from '../data/avatars';
@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     paddingVertical: 24,
     paddingHorizontal: 22,
+    ...shadows.floating,
   },
   title: {
     fontFamily: fonts.headingSemi,

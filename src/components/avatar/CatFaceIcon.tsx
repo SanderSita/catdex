@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import type { CatIconId } from '../../data/avatars';
+import { coloredGlow } from '../../theme';
 
 interface Props {
   expression: CatIconId;
@@ -13,13 +14,15 @@ const VIEWBOX = 64;
 
 export function CatFaceIcon({ expression, color, faceColor = '#FFFFFF', size = 64 }: Props) {
   return (
-    <View style={[styles.wrap, { width: size, height: size, borderRadius: size / 2, backgroundColor: color }]}>
-      <Svg width={size} height={size} viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}>
-        <Path d="M14 20 L22 6 L28 20 Z" fill={faceColor} />
-        <Path d="M36 20 L42 6 L50 20 Z" fill={faceColor} />
-        <Eyes expression={expression} faceColor={faceColor} />
-        <Mouth expression={expression} faceColor={faceColor} />
-      </Svg>
+    <View style={[styles.outer, { borderRadius: size / 2 }, coloredGlow(color, 0.25)]}>
+      <View style={[styles.wrap, { width: size, height: size, borderRadius: size / 2, backgroundColor: color }]}>
+        <Svg width={size} height={size} viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}>
+          <Path d="M14 20 L22 6 L28 20 Z" fill={faceColor} />
+          <Path d="M36 20 L42 6 L50 20 Z" fill={faceColor} />
+          <Eyes expression={expression} faceColor={faceColor} />
+          <Mouth expression={expression} faceColor={faceColor} />
+        </Svg>
+      </View>
     </View>
   );
 }
@@ -94,5 +97,6 @@ function Mouth({ expression, faceColor }: { expression: CatIconId; faceColor: st
 }
 
 const styles = StyleSheet.create({
+  outer: {},
   wrap: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
 });

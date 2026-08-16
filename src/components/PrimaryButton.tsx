@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
-import { colors, fonts } from '../theme';
+import Animated from 'react-native-reanimated';
+import { colors, fonts, shadows } from '../theme';
+import { usePressScale } from '../hooks/usePressScale';
 
 interface PrimaryButtonProps {
   label: string;
@@ -8,20 +10,21 @@ interface PrimaryButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 export function PrimaryButton({ label, onPress, disabled, style }: PrimaryButtonProps) {
+  const { onPressIn, onPressOut, animatedStyle } = usePressScale();
+
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
+      onPressIn={disabled ? undefined : onPressIn}
+      onPressOut={disabled ? undefined : onPressOut}
       disabled={disabled}
-      style={({ pressed }) => [
-        styles.button,
-        disabled ? styles.disabled : null,
-        pressed ? styles.pressed : null,
-        style,
-      ]}
+      style={[styles.button, disabled ? styles.disabled : null, animatedStyle, style]}
     >
       <Text style={styles.label}>{label}</Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -31,9 +34,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingVertical: 16,
     alignItems: 'center',
-  },
-  pressed: {
-    backgroundColor: colors.coralDark,
+    ...shadows.level2,
   },
   disabled: {
     opacity: 0.5,

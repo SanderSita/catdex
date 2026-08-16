@@ -132,6 +132,11 @@
     "nice": "Mooi!",
     "next": "Volgende"
   },
+  "catCaught": {
+    "title": "Gevangen!",
+    "subtitle": "{{name}} is toegevoegd aan je CatDex",
+    "nice": "Geweldig!"
+  },
   "errors": {
     "connectionFailed": "Kon geen verbinding maken: {{error}}",
     "signInFailed": "Anoniem inloggen is mislukt.",
