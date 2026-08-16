@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated from 'react-native-reanimated';
 import { ChevronRight } from 'lucide-react-native';
 import { colors, fonts, shadows } from '../theme';
-import { usePressScale } from '../hooks/usePressScale';
 
 interface SettingsRowProps {
   title: string;
@@ -13,25 +11,15 @@ interface SettingsRowProps {
   onPress?: () => void;
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 export function SettingsRow({ title, detail, chevron = true, isLast, onPress }: SettingsRowProps) {
-  const { onPressIn, onPressOut, animatedStyle } = usePressScale({ pressedScale: 0.98, haptic: false });
-
   return (
-    <AnimatedPressable
-      onPress={onPress}
-      onPressIn={onPressIn}
-      onPressOut={onPressOut}
-      hitSlop={4}
-      style={[styles.row, isLast ? null : styles.divider, animatedStyle]}
-    >
+    <Pressable onPress={onPress} hitSlop={4} style={[styles.row, isLast ? null : styles.divider]}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.right}>
         {detail ? <Text style={styles.detail}>{detail}</Text> : null}
         {chevron ? <ChevronRight size={18} color={colors.textLight} /> : null}
       </View>
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 
