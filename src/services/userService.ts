@@ -12,6 +12,7 @@ export interface UserProfile {
   notificationsEnabled: boolean;
   friendCode: string | null;
   friendNotificationsEnabled: boolean;
+  isPrivate: boolean;
   stats: UserStats;
 }
 
@@ -25,6 +26,7 @@ interface ProfileRow {
   notifications_enabled: boolean;
   friend_code: string | null;
   friend_notifications_enabled: boolean;
+  is_private: boolean;
   cats_found: number;
   breeds_unlocked: number;
   day_streak: number;
@@ -41,6 +43,7 @@ function mapProfileRow(row: ProfileRow): UserProfile {
     notificationsEnabled: row.notifications_enabled,
     friendCode: row.friend_code,
     friendNotificationsEnabled: row.friend_notifications_enabled,
+    isPrivate: row.is_private,
     stats: {
       catsFound: row.cats_found,
       breedsUnlocked: row.breeds_unlocked,
@@ -94,7 +97,9 @@ export async function updateAvatar(uid: string, icon: CatIconId, color: string):
 
 export async function updateUserSettings(
   uid: string,
-  patch: Partial<Pick<UserProfile, 'defaultRadiusKm' | 'notificationsEnabled' | 'friendNotificationsEnabled'>>
+  patch: Partial<
+    Pick<UserProfile, 'defaultRadiusKm' | 'notificationsEnabled' | 'friendNotificationsEnabled' | 'isPrivate'>
+  >
 ): Promise<void> {
   const { error } = await supabase
     .from('profiles')
@@ -104,6 +109,7 @@ export async function updateUserSettings(
       ...(patch.friendNotificationsEnabled !== undefined && {
         friend_notifications_enabled: patch.friendNotificationsEnabled,
       }),
+      ...(patch.isPrivate !== undefined && { is_private: patch.isPrivate }),
     })
     .eq('id', uid);
   if (error) throw error;

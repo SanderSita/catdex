@@ -73,7 +73,12 @@
   },
   "privacy": {
     "title": "Privacy",
-    "body": "Your sightings and photos are private to your account by default. If you add a friend and they accept, they can see your cats, sightings, and catch locations. Location data is never shared with anyone who isn't an accepted friend."
+    "settingsHeader": "Privacy",
+    "privateProfile": "Private profile",
+    "public": "Public",
+    "private": "Private",
+    "bodyPublic": "Your profile is public. Nearby cats you've caught can appear on the map for any signed-in user. Your full collection, sightings, and catch locations are still only visible to accepted friends.",
+    "bodyPrivate": "Your profile is private. Your cats no longer appear on the map for anyone except accepted friends. Only accepted friends can see your collection, sightings, and catch locations."
   },
   "editUsername": {
     "title": "Edit username",

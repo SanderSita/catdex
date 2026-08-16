@@ -73,7 +73,12 @@
   },
   "privacy": {
     "title": "Privacy",
-    "body": "Je waarnemingen en foto's zijn standaard privé voor jouw account. Als je een vriend toevoegt en die accepteert, kan diegene je katten, waarnemingen en vangstlocaties zien. Locatiegegevens worden nooit gedeeld met iemand die geen geaccepteerde vriend is."
+    "settingsHeader": "Privacy",
+    "privateProfile": "Privéprofiel",
+    "public": "Openbaar",
+    "private": "Privé",
+    "bodyPublic": "Je profiel is openbaar. Katten die je in de buurt hebt gevangen, kunnen op de kaart verschijnen voor elke ingelogde gebruiker. Je volledige collectie, waarnemingen en vangstlocaties zijn nog steeds alleen zichtbaar voor geaccepteerde vrienden.",
+    "bodyPrivate": "Je profiel is privé. Je katten verschijnen niet meer op de kaart, behalve voor geaccepteerde vrienden. Alleen geaccepteerde vrienden kunnen je collectie, waarnemingen en vangstlocaties zien."
   },
   "editUsername": {
     "title": "Gebruikersnaam bewerken",
